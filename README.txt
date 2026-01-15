@@ -1,10 +1,14 @@
 ============================================
-    BATHYMETRY EXPLORER v2.0
+    BATHYMETRY EXPLORER v2.0.1
     Mappe Batimetriche per Pesca Sportiva
 ============================================
 
 TODO PROSSIMA SESSIONE (v2.1.0)
 -------------------------------
+[ ] Git commit modifiche sidebar (vedi comando suggerito in HANDOVER)
+[ ] Deploy su GitHub Pages e test dispositivi reali
+[ ] Verifica mobile scrolling sidebar con nuovo ordine
+[ ] Incrementare VERSION in sw.js per refresh cache
 [ ] Rotazione forme (angolo custom per rettangoli/triangoli)
 [ ] Persistenza nome punto raduno quando modificato
 [ ] Undo/Redo per modifiche editing
@@ -12,6 +16,32 @@ TODO PROSSIMA SESSIONE (v2.1.0)
 [ ] Import campo da GeoJSON
 [ ] Copia campo esistente come template
 [ ] Keyboard shortcuts (Esc=annulla, Enter=salva)
+
+NUOVE FUNZIONALITA v2.0.1 (2026-01-15) - RIORDINO SIDEBAR
+----------------------------------------------------------
+[x] ORDINE SEZIONI OTTIMIZZATO per workflow pescatore:
+    1. Search (APERTA per default)
+    2. Favorites
+    3. Tournament (Gare)
+    4. Offline
+    5. Zones (Campi di Gara)
+    6. GPS Tracking
+    7. Catch Log
+    8. Ruler
+    9. Fishing
+    10. Bathymetry
+    11. Base Layers
+    12. Display
+    13. Legend
+    14. Position
+
+[x] SEARCH APERTA DI DEFAULT
+    - Rimossa classe 'collapsed' da searchSection
+    - L'utente vede subito il campo di ricerca all'apertura
+
+[x] COMMENTI NUMERATI nel codice HTML
+    - Ogni sezione ha commento <!-- N. Nome Section -->
+    - Facilita manutenzione futura
 
 NUOVE FUNZIONALITA v2.0.0 (2026-01-15)
 --------------------------------------
@@ -195,6 +225,19 @@ FUNZIONALITA v1.4.0 (2026-01-14)
 
 DOCUMENTAZIONE TECNICA
 ----------------------
+>>> SESSIONE v2.0.1 (Riordino Sidebar) <<<
+
+- HANDOVER_SESSIONE_RIORDINO_SIDEBAR_20260115.md
+  Riepilogo sessione con CONFESSIONE ERRORI ONESTA:
+  - Errore 1: Rimozione accidentale sezione Offline
+  - Errore 2: Creazione sezioni duplicate invece di spostamento
+  - Errore 3: Multipli passaggi di correzione necessari
+
+- DOCUMENTAZIONE_TECNICA_SIDEBAR_20260115.md
+  Riferimento completo sidebar: architettura DOM, classi CSS,
+  sistema toggle, mappa ID sezioni, linee codice, localStorage,
+  CSS responsive, Service Worker, troubleshooting
+
 >>> SESSIONE v1.5.0 (Editing Avanzato) <<<
 
 - HANDOVER_SESSIONE_EDITING_AVANZATO_20260114.md

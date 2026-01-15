@@ -1630,68 +1630,8 @@
 
     <!-- Sidebar - All controls on left side -->
     <div class="sidebar" id="sidebar">
-        <!-- Offline Section - PRIORITÀ per mobile -->
-        <div class="sidebar-section collapsible collapsed" id="offlineSection">
-            <h3 onclick="toggleSection('offlineSection')">
-                <i class="fas fa-cloud-download-alt"></i>
-                <span class="section-title-text">Offline</span>
-                <button class="help-btn" onclick="event.stopPropagation(); showHelp('offline')" title="Guida">?</button>
-                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
-            </h3>
-            <div class="section-content">
-                <p style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 10px;">
-                    Scarica le mappe dal porto al campo di gara per navigare senza internet.
-                </p>
-
-                <!-- Selezione Campo di Gara -->
-                <div class="form-group" style="margin-bottom: 10px;">
-                    <label style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px; display: block;">
-                        <i class="fas fa-flag-checkered"></i> Campo di Gara
-                    </label>
-                    <select id="offlineZoneSelect" style="width: 100%; padding: 8px; background: #1e293b; border: 1px solid rgba(148,163,184,0.3); border-radius: 6px; color: #e2e8f0; font-size: 0.8rem;">
-                        <option value="">-- Seleziona campo --</option>
-                    </select>
-                </div>
-
-                <!-- Info area da scaricare -->
-                <div id="offlineAreaInfo" style="display: none; background: rgba(14,165,233,0.1); border: 1px solid rgba(14,165,233,0.3); border-radius: 6px; padding: 8px; margin-bottom: 10px; font-size: 0.7rem;">
-                    <div style="color: #0ea5e9; font-weight: 600; margin-bottom: 4px;">
-                        <i class="fas fa-info-circle"></i> Area download:
-                    </div>
-                    <div id="offlineAreaDetails" style="color: #94a3b8;"></div>
-                </div>
-
-                <button id="downloadOfflineBtn" class="competition-field-btn" style="width: 100%; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);" onclick="downloadZoneForOffline()" disabled>
-                    <i class="fas fa-download"></i> Scarica Mappe Gara
-                </button>
-
-                <div id="offlineProgressContainer" style="display: none; margin-top: 10px;">
-                    <div style="background: #1e293b; border-radius: 4px; height: 8px; overflow: hidden;">
-                        <div id="offlineProgress" style="background: linear-gradient(90deg, #0ea5e9, #22c55e); height: 100%; width: 0%; transition: width 0.3s;"></div>
-                    </div>
-                    <div id="offlineProgressText" style="font-size: 0.7rem; color: #94a3b8; margin-top: 4px; text-align: center;">
-                        Preparazione...
-                    </div>
-                </div>
-
-                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(148,163,184,0.2);">
-                    <div class="info-row" style="margin-bottom: 8px;">
-                        <span class="label">Cache salvata:</span>
-                        <span class="value" id="cacheSize">0 MB</span>
-                    </div>
-                    <button class="competition-field-btn" style="width: 100%; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); font-size: 0.75rem; padding: 6px;" onclick="clearOfflineCache()">
-                        <i class="fas fa-trash"></i> Pulisci Cache
-                    </button>
-                </div>
-
-                <div style="margin-top: 10px; font-size: 0.65rem; color: #64748b;">
-                    <i class="fas fa-info-circle"></i> Include: Porto partenza + Campo gara + 10nm buffer
-                </div>
-            </div><!-- /section-content -->
-        </div>
-
-        <!-- Search Section -->
-        <div class="sidebar-section collapsible collapsed" id="searchSection">
+        <!-- 1. Search Section - APERTA PER DEFAULT -->
+        <div class="sidebar-section collapsible" id="searchSection">
             <h3 onclick="toggleSection('searchSection')">
                 <i class="fas fa-search"></i>
                 <span class="section-title-text">Cerca Posizione</span>
@@ -1743,356 +1683,7 @@
             </div><!-- /section-content -->
         </div>
 
-        <!-- Bathymetry Layers Section -->
-        <div class="sidebar-section collapsible collapsed" id="bathymetrySection">
-            <h3 onclick="toggleSection('bathymetrySection')">
-                <i class="fas fa-water"></i>
-                <span class="section-title-text">Batimetria</span>
-                <button class="help-btn" onclick="event.stopPropagation(); showHelp('bathymetry')" title="Guida">?</button>
-                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
-            </h3>
-            <div class="section-content">
-            <div class="layer-item" data-coverage="europe">
-                <input type="checkbox" id="layerBathy" checked>
-                <label for="layerBathy">
-                    <div class="layer-title">
-                        EMODnet Batimetria
-                        <a href="https://emodnet.ec.europa.eu/en/bathymetry" target="_blank" class="info-link" title="Info EMODnet"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge europe">Europa</span>
-                    </div>
-                    <div class="layer-desc">Profondità con scala colori</div>
-                </label>
-            </div>
-            <div class="layer-item" data-coverage="europe">
-                <input type="checkbox" id="layerBathyHR">
-                <label for="layerBathyHR">
-                    <div class="layer-title">
-                        Alta Risoluzione (HR)
-                        <a href="https://emodnet.ec.europa.eu/en/bathymetry" target="_blank" class="info-link" title="Info EMODnet HR"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge europe">Europa</span>
-                    </div>
-                    <div class="layer-desc">Dettaglio maggiore dove disponibile</div>
-                </label>
-            </div>
-            <div class="layer-item" data-coverage="global">
-                <input type="checkbox" id="layerGEBCO">
-                <label for="layerGEBCO">
-                    <div class="layer-title">
-                        GEBCO 2024 WMS
-                        <a href="https://www.gebco.net/data-products/gebco-web-services/web-map-service" target="_blank" class="info-link" title="Info GEBCO WMS"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge global">Globale</span>
-                    </div>
-                    <div class="layer-desc">Griglia batimetrica ufficiale mondiale</div>
-                </label>
-            </div>
-            <div class="layer-item" data-coverage="usa">
-                <input type="checkbox" id="layerBlueTopo">
-                <label for="layerBlueTopo">
-                    <div class="layer-title">
-                        NOAA BlueTopo
-                        <a href="https://nauticalcharts.noaa.gov/data/bluetopo.html" target="_blank" class="info-link" title="Info BlueTopo"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge usa">USA</span>
-                    </div>
-                    <div class="layer-desc">Batimetria navale alta precisione</div>
-                </label>
-            </div>
-            <div class="layer-item" data-coverage="global">
-                <input type="checkbox" id="layerETOPO">
-                <label for="layerETOPO">
-                    <div class="layer-title">
-                        Esri Ocean Base
-                        <a href="https://www.arcgis.com/home/item.html?id=1e126e7520f9466c9ca28b8f28b5e500" target="_blank" class="info-link" title="Info Esri Ocean"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge global">Globale</span>
-                    </div>
-                    <div class="layer-desc">Batimetria mondiale (consigliato)</div>
-                </label>
-            </div>
-            <div class="layer-item" data-coverage="global">
-                <input type="checkbox" id="layerOceanRef">
-                <label for="layerOceanRef">
-                    <div class="layer-title">
-                        Etichette Profondità
-                        <a href="https://carto.com/basemaps/" target="_blank" class="info-link" title="Info CartoDB"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge global">Globale</span>
-                    </div>
-                    <div class="layer-desc">Nomi e annotazioni oceaniche</div>
-                </label>
-            </div>
-            <div class="layer-item" data-coverage="europe">
-                <input type="checkbox" id="layerContours">
-                <label for="layerContours">
-                    <div class="layer-title">
-                        Isobate (linee profondità)
-                        <a href="https://emodnet.ec.europa.eu/en/bathymetry" target="_blank" class="info-link" title="Info EMODnet"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge europe">Europa</span>
-                    </div>
-                    <div class="layer-desc">Linee ravvicinate = pendenza ripida</div>
-                </label>
-            </div>
-            </div><!-- /section-content -->
-        </div>
-
-        <!-- Fishing Layers Section -->
-        <div class="sidebar-section collapsible collapsed" id="fishingSection">
-            <h3 onclick="toggleSection('fishingSection')">
-                <i class="fas fa-fish"></i>
-                <span class="section-title-text">Layer Pesca Sportiva</span>
-                <button class="help-btn" onclick="event.stopPropagation(); showHelp('fishing')" title="Guida">?</button>
-                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
-            </h3>
-            <div class="section-content">
-            <div class="layer-item" data-coverage="global">
-                <input type="checkbox" id="layerSST">
-                <label for="layerSST">
-                    <div class="layer-title">
-                        Temperatura Mare (SST)
-                        <a href="https://coralreefwatch.noaa.gov/product/5km/index.php" target="_blank" class="info-link" title="Info NOAA SST"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge global">Globale</span>
-                    </div>
-                    <div class="layer-desc">Fondamentale per pelagici</div>
-                </label>
-            </div>
-            <div class="layer-item" data-coverage="global">
-                <input type="checkbox" id="layerChlorophyll">
-                <label for="layerChlorophyll">
-                    <div class="layer-title">
-                        Clorofilla
-                        <a href="https://marine.copernicus.eu/" target="_blank" class="info-link" title="Info Copernicus Marine"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge global">Globale</span>
-                    </div>
-                    <div class="layer-desc">Produttività = pesce foraggio</div>
-                </label>
-            </div>
-            <div class="layer-item" data-coverage="global">
-                <input type="checkbox" id="layerCurrents">
-                <label for="layerCurrents">
-                    <div class="layer-title">
-                        Correnti Marine
-                        <a href="https://marine.copernicus.eu/" target="_blank" class="info-link" title="Info Copernicus Marine"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge global">Globale</span>
-                    </div>
-                    <div class="layer-desc">Direzione e intensità</div>
-                </label>
-            </div>
-            <div class="layer-item" data-coverage="global">
-                <input type="checkbox" id="layerWaves">
-                <label for="layerWaves">
-                    <div class="layer-title">
-                        Altezza Onde
-                        <a href="https://marine.copernicus.eu/" target="_blank" class="info-link" title="Info Copernicus Marine"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge global">Globale</span>
-                    </div>
-                    <div class="layer-desc">Condizioni meteo marine</div>
-                </label>
-            </div>
-            <div class="layer-item" data-coverage="global">
-                <input type="checkbox" id="layerWinds">
-                <label for="layerWinds">
-                    <div class="layer-title">
-                        Vento
-                        <a href="https://openweathermap.org/api/weathermaps" target="_blank" class="info-link" title="Info OpenWeatherMap"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge global">Globale</span>
-                    </div>
-                    <div class="layer-desc">Direzione e velocità</div>
-                </label>
-            </div>
-            </div><!-- /section-content -->
-        </div>
-
-        <!-- Base Layers Section -->
-        <div class="sidebar-section collapsible collapsed" id="baseLayersSection">
-            <h3 onclick="toggleSection('baseLayersSection')">
-                <i class="fas fa-layer-group"></i>
-                <span class="section-title-text">Layer Base</span>
-                <button class="help-btn" onclick="event.stopPropagation(); showHelp('baseLayers')" title="Guida">?</button>
-                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
-            </h3>
-            <div class="section-content">
-            <div class="layer-item" data-coverage="global">
-                <input type="checkbox" id="layerSeamarks" checked>
-                <label for="layerSeamarks">
-                    <div class="layer-title">
-                        Segnali nautici
-                        <a href="https://wiki.openseamap.org/wiki/OpenSeaMap-dev:Portal" target="_blank" class="info-link" title="Info OpenSeaMap"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge global">Globale</span>
-                    </div>
-                    <div class="layer-desc">Boe, fari, rotte</div>
-                </label>
-            </div>
-            <div class="layer-item" data-coverage="global">
-                <input type="checkbox" id="layerHarbours">
-                <label for="layerHarbours">
-                    <div class="layer-title">
-                        Porti e marine
-                        <a href="https://wiki.openseamap.org/wiki/OpenSeaMap-dev:Portal" target="_blank" class="info-link" title="Info OpenSeaMap"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge global">Globale</span>
-                    </div>
-                    <div class="layer-desc">Approdi e servizi</div>
-                </label>
-            </div>
-            <div class="layer-item" data-coverage="global">
-                <input type="checkbox" id="layerSatellite">
-                <label for="layerSatellite">
-                    <div class="layer-title">
-                        Satellite
-                        <a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank" class="info-link" title="Info Esri Satellite"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge global">Globale</span>
-                    </div>
-                    <div class="layer-desc">Immagini satellitari</div>
-                </label>
-            </div>
-            <div class="layer-item" data-coverage="europe">
-                <input type="checkbox" id="layerMPA">
-                <label for="layerMPA">
-                    <div class="layer-title">
-                        Aree Marine Protette
-                        <a href="https://emodnet.ec.europa.eu/en/human-activities" target="_blank" class="info-link" title="Info EMODnet Human Activities"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge europe">Europa</span>
-                    </div>
-                    <div class="layer-desc">Zone con restrizioni pesca</div>
-                </label>
-            </div>
-            </div><!-- /section-content -->
-        </div>
-
-        <!-- Display Controls Section -->
-        <div class="sidebar-section collapsible collapsed" id="displaySection">
-            <h3 onclick="toggleSection('displaySection')">
-                <i class="fas fa-sliders-h"></i>
-                <span class="section-title-text">Controlli Display</span>
-                <button class="help-btn" onclick="event.stopPropagation(); showHelp('display')" title="Guida">?</button>
-                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
-            </h3>
-            <div class="section-content">
-            <div class="slider-control">
-                <label>Opacità batimetria: <span id="opacityValue">40%</span></label>
-                <input type="range" id="opacitySlider" min="0" max="100" value="40">
-            </div>
-            <div class="slider-control">
-                <label>Luminosità mappa: <span id="brightnessValue">100%</span></label>
-                <input type="range" id="brightnessSlider" min="50" max="200" value="100">
-            </div>
-            </div><!-- /section-content -->
-        </div>
-
-        <!-- Ruler Tool Section -->
-        <div class="sidebar-section collapsible collapsed" id="rulerSection">
-            <h3 onclick="toggleSection('rulerSection')">
-                <i class="fas fa-ruler"></i>
-                <span class="section-title-text">Righello</span>
-                <button class="help-btn" onclick="event.stopPropagation(); showHelp('ruler')" title="Guida">?</button>
-                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
-            </h3>
-            <div class="section-content">
-            <div class="ruler-controls">
-                <button id="rulerToggleBtn" class="ruler-btn primary" onclick="toggleRuler()">
-                    <i class="fas fa-ruler"></i> Misura
-                </button>
-                <button id="rulerEditBtn" class="ruler-btn secondary" onclick="toggleEditMode()" style="display:none;">
-                    <i class="fas fa-edit"></i> Modifica
-                </button>
-                <button class="ruler-btn secondary" onclick="clearRuler()">
-                    <i class="fas fa-trash"></i> Pulisci
-                </button>
-            </div>
-            <div id="rulerResult" class="ruler-result">
-                <!-- Sezione Distanza (visibile durante misurazione lineare) -->
-                <div id="rulerDistanceSection">
-                    <div class="ruler-result-title"><i class="fas fa-route"></i> Distanza Totale</div>
-                    <div class="ruler-distance">
-                        <div class="ruler-value">
-                            <span id="rulerNm" class="number">0.00</span>
-                            <span class="unit">Miglia Nautiche</span>
-                        </div>
-                        <div class="ruler-value">
-                            <span id="rulerKm" class="number">0.00</span>
-                            <span class="unit">Chilometri</span>
-                        </div>
-                    </div>
-                </div>
-                <!-- Sezione Superficie (visibile per poligoni chiusi) -->
-                <div id="rulerAreaSection" style="display: none;">
-                    <div class="ruler-result-title"><i class="fas fa-vector-square"></i> Superficie Campo</div>
-                    <div class="ruler-distance">
-                        <div class="ruler-value">
-                            <span id="rulerAreaNmSq" class="number">0.00</span>
-                            <span class="unit">nm<sup>2</sup></span>
-                        </div>
-                        <div class="ruler-value">
-                            <span id="rulerAreaKmSq" class="number">0.00</span>
-                            <span class="unit">km<sup>2</sup></span>
-                        </div>
-                    </div>
-                </div>
-                <div id="rulerPoints" class="ruler-points">Clicca sulla mappa per aggiungere punti</div>
-            </div>
-            </div><!-- /section-content -->
-        </div>
-
-        <!-- Competition Field Section -->
-        <div class="sidebar-section collapsible collapsed" id="zonesSection">
-            <h3 onclick="toggleSection('zonesSection')">
-                <i class="fas fa-trophy"></i>
-                <span class="section-title-text">Campi di Gara</span>
-                <button class="help-btn" onclick="event.stopPropagation(); showHelp('zones')" title="Guida">?</button>
-                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
-            </h3>
-            <div class="section-content">
-
-            <!-- Dropdown selezione campo -->
-            <div style="margin-bottom: 10px;">
-                <select id="zoneSelect" class="zone-select" onchange="onZoneSelectChange()">
-                    <option value="">-- Seleziona campo --</option>
-                </select>
-            </div>
-
-            <!-- Checkbox per mostrare/nascondere zona -->
-            <div class="layer-control" style="margin-bottom: 10px;">
-                <input type="checkbox" id="showZoneCheckbox" onchange="toggleZoneVisibility()">
-                <label for="showZoneCheckbox">
-                    <i class="fas fa-draw-polygon"></i> Mostra Zona Gara
-                </label>
-            </div>
-
-            <!-- Azioni campo -->
-            <div class="zone-actions" style="display: flex; gap: 6px; flex-wrap: wrap;">
-                <button class="competition-field-btn" style="flex: 1; min-width: 70px;" onclick="goToSelectedZone()">
-                    <i class="fas fa-location-arrow"></i> Vai
-                </button>
-                <button class="competition-field-btn" style="flex: 1; min-width: 70px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);" onclick="editSelectedZone()">
-                    <i class="fas fa-edit"></i> Modifica
-                </button>
-                <button class="competition-field-btn" style="flex: 1; min-width: 70px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);" onclick="deleteSelectedZone()">
-                    <i class="fas fa-trash"></i> Elimina
-                </button>
-                <button class="competition-field-btn" style="flex: 1; min-width: 70px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);" onclick="exportZonesData()">
-                    <i class="fas fa-download"></i> Esporta
-                </button>
-            </div>
-
-            <!-- Sposta Centro (per campi creati con centro+raggio) -->
-            <div style="margin-top: 8px; display: flex; align-items: center; gap: 4px;">
-                <button class="competition-field-btn" style="flex: 1; background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);" onclick="showEditCenterDialog()">
-                    <i class="fas fa-crosshairs"></i> Sposta Centro
-                </button>
-                <button class="help-btn-inline" onclick="showHelp('editCenter')" title="Guida Sposta Centro">?</button>
-            </div>
-
-            <!-- Creazione nuovo campo -->
-            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 4px;">
-                <button class="competition-field-btn" style="flex: 1; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);" onclick="showCreateZoneDialog()">
-                    <i class="fas fa-plus-circle"></i> Nuovo Campo (Centro + Raggio)
-                </button>
-                <button class="help-btn-inline" onclick="showHelp('createZone')" title="Guida Nuovo Campo">?</button>
-            </div>
-
-            <div id="competitionFieldContainer" style="display: none; margin-top: 10px;">
-                <!-- Rendered by JavaScript -->
-            </div>
-            </div><!-- /section-content -->
-        </div>
-
-        <!-- GARE Section - Tournament Mode -->
+        <!-- 3. Tournament Section - Gare -->
         <div class="sidebar-section collapsible collapsed" id="tournamentSection">
             <h3 onclick="toggleSection('tournamentSection')">
                 <i class="fas fa-trophy"></i>
@@ -2171,75 +1762,130 @@
             </div><!-- /section-content -->
         </div>
 
-        <!-- Catch Log Section -->
-        <div class="sidebar-section collapsible collapsed" id="catchLogSection">
-            <h3 onclick="toggleSection('catchLogSection')">
-                <i class="fas fa-fish"></i>
-                <span class="section-title-text">Catch Log</span>
-                <button class="help-btn" onclick="event.stopPropagation(); showHelp('catchLog')" title="Guida">?</button>
+        <!-- 4. Offline Section -->
+        <div class="sidebar-section collapsible collapsed" id="offlineSection">
+            <h3 onclick="toggleSection('offlineSection')">
+                <i class="fas fa-cloud-download-alt"></i>
+                <span class="section-title-text">Offline</span>
+                <button class="help-btn" onclick="event.stopPropagation(); showHelp('offline')" title="Guida">?</button>
+                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
+            </h3>
+            <div class="section-content">
+                <p style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 10px;">
+                    Scarica le mappe dal porto al campo di gara per navigare senza internet.
+                </p>
+
+                <!-- Selezione Campo di Gara -->
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px; display: block;">
+                        <i class="fas fa-flag-checkered"></i> Campo di Gara
+                    </label>
+                    <select id="offlineZoneSelect" style="width: 100%; padding: 8px; background: #1e293b; border: 1px solid rgba(148,163,184,0.3); border-radius: 6px; color: #e2e8f0; font-size: 0.8rem;">
+                        <option value="">-- Seleziona campo --</option>
+                    </select>
+                </div>
+
+                <!-- Info area da scaricare -->
+                <div id="offlineAreaInfo" style="display: none; background: rgba(14,165,233,0.1); border: 1px solid rgba(14,165,233,0.3); border-radius: 6px; padding: 8px; margin-bottom: 10px; font-size: 0.7rem;">
+                    <div style="color: #0ea5e9; font-weight: 600; margin-bottom: 4px;">
+                        <i class="fas fa-info-circle"></i> Area download:
+                    </div>
+                    <div id="offlineAreaDetails" style="color: #94a3b8;"></div>
+                </div>
+
+                <button id="downloadOfflineBtn" class="competition-field-btn" style="width: 100%; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);" onclick="downloadZoneForOffline()" disabled>
+                    <i class="fas fa-download"></i> Scarica Mappe Gara
+                </button>
+
+                <div id="offlineProgressContainer" style="display: none; margin-top: 10px;">
+                    <div style="background: #1e293b; border-radius: 4px; height: 8px; overflow: hidden;">
+                        <div id="offlineProgress" style="background: linear-gradient(90deg, #0ea5e9, #22c55e); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                    </div>
+                    <div id="offlineProgressText" style="font-size: 0.7rem; color: #94a3b8; margin-top: 4px; text-align: center;">
+                        Preparazione...
+                    </div>
+                </div>
+
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(148,163,184,0.2);">
+                    <div class="info-row" style="margin-bottom: 8px;">
+                        <span class="label">Cache salvata:</span>
+                        <span class="value" id="cacheSize">0 MB</span>
+                    </div>
+                    <button class="competition-field-btn" style="width: 100%; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); font-size: 0.75rem; padding: 6px;" onclick="clearOfflineCache()">
+                        <i class="fas fa-trash"></i> Pulisci Cache
+                    </button>
+                </div>
+
+                <div style="margin-top: 10px; font-size: 0.65rem; color: #64748b;">
+                    <i class="fas fa-info-circle"></i> Include: Porto partenza + Campo gara + 10nm buffer
+                </div>
+            </div><!-- /section-content -->
+        </div>
+
+        <!-- 5. Zones Section - Campi di Gara -->
+        <div class="sidebar-section collapsible collapsed" id="zonesSection">
+            <h3 onclick="toggleSection('zonesSection')">
+                <i class="fas fa-trophy"></i>
+                <span class="section-title-text">Campi di Gara</span>
+                <button class="help-btn" onclick="event.stopPropagation(); showHelp('zones')" title="Guida">?</button>
                 <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
             </h3>
             <div class="section-content">
 
-            <!-- Pulsanti Segna Punto (modalita normale) -->
-            <div id="normalCatchControls" class="catch-controls" style="display: flex; gap: 6px; margin-bottom: 10px; align-items: center;">
-                <button id="catchModeBtn" class="ruler-btn primary" onclick="toggleCatchMode()" style="flex: 1;">
-                    <i class="fas fa-map-marker-alt"></i> Segna
-                </button>
-                <button class="ruler-btn secondary" onclick="useCurrentGPS()" style="flex: 1;">
-                    <i class="fas fa-location-arrow"></i> GPS
-                </button>
-                <button class="help-btn-inline" onclick="showHelp('catchMark')" title="Guida Segna Punto">?</button>
-            </div>
-
-            <!-- Statistiche giornata -->
-            <div id="catchStats" class="catch-stats">
-                <div class="catch-stat-item">
-                    <span class="stat-number" id="todayCount">0</span>
-                    <span class="stat-label">Oggi</span>
-                </div>
-                <div class="catch-stat-item">
-                    <span class="stat-number" id="totalCount">0</span>
-                    <span class="stat-label">Totale</span>
-                </div>
-            </div>
-
-            <!-- Filtri -->
-            <div class="catch-filters" style="margin-top: 10px;">
-                <select id="catchFilterType" class="zone-select" onchange="applyCatchFilters()" style="margin-bottom: 6px;">
-                    <option value="all">Tutti i tipi</option>
-                    <option value="strike">Strike</option>
-                    <option value="release">Rilascio</option>
-                    <option value="sighting">Avvistamento</option>
-                    <option value="weighed_catch">Cattura Pesata</option>
-                </select>
-                <select id="catchFilterSpecies" class="zone-select" onchange="applyCatchFilters()">
-                    <option value="all">Tutte le specie</option>
+            <!-- Dropdown selezione campo -->
+            <div style="margin-bottom: 10px;">
+                <select id="zoneSelect" class="zone-select" onchange="onZoneSelectChange()">
+                    <option value="">-- Seleziona campo --</option>
                 </select>
             </div>
 
-            <!-- Lista catture scrollabile -->
-            <div id="catchListContainer" class="catch-list-container">
-                <div class="catch-list-empty">
-                    <i class="fas fa-fish"></i>
-                    <p>Nessuna cattura registrata</p>
-                    <small>Clicca "Registra" e poi sulla mappa</small>
-                </div>
+            <!-- Checkbox per mostrare/nascondere zona -->
+            <div class="layer-control" style="margin-bottom: 10px;">
+                <input type="checkbox" id="showZoneCheckbox" onchange="toggleZoneVisibility()">
+                <label for="showZoneCheckbox">
+                    <i class="fas fa-draw-polygon"></i> Mostra Zona Gara
+                </label>
             </div>
 
-            <!-- Azioni Export -->
-            <div class="catch-export-actions" style="margin-top: 10px; display: flex; gap: 6px;">
-                <button class="competition-field-btn" style="flex: 1; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);" onclick="exportCatchesJSON()">
-                    <i class="fas fa-download"></i> JSON
+            <!-- Azioni campo -->
+            <div class="zone-actions" style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button class="competition-field-btn" style="flex: 1; min-width: 70px;" onclick="goToSelectedZone()">
+                    <i class="fas fa-location-arrow"></i> Vai
                 </button>
-                <button class="competition-field-btn" style="flex: 1; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);" onclick="exportCatchesCSV()">
-                    <i class="fas fa-file-csv"></i> CSV
+                <button class="competition-field-btn" style="flex: 1; min-width: 70px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);" onclick="editSelectedZone()">
+                    <i class="fas fa-edit"></i> Modifica
                 </button>
+                <button class="competition-field-btn" style="flex: 1; min-width: 70px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);" onclick="deleteSelectedZone()">
+                    <i class="fas fa-trash"></i> Elimina
+                </button>
+                <button class="competition-field-btn" style="flex: 1; min-width: 70px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);" onclick="exportZonesData()">
+                    <i class="fas fa-download"></i> Esporta
+                </button>
+            </div>
+
+            <!-- Sposta Centro (per campi creati con centro+raggio) -->
+            <div style="margin-top: 8px; display: flex; align-items: center; gap: 4px;">
+                <button class="competition-field-btn" style="flex: 1; background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);" onclick="showEditCenterDialog()">
+                    <i class="fas fa-crosshairs"></i> Sposta Centro
+                </button>
+                <button class="help-btn-inline" onclick="showHelp('editCenter')" title="Guida Sposta Centro">?</button>
+            </div>
+
+            <!-- Creazione nuovo campo -->
+            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 4px;">
+                <button class="competition-field-btn" style="flex: 1; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);" onclick="showCreateZoneDialog()">
+                    <i class="fas fa-plus-circle"></i> Nuovo Campo (Centro + Raggio)
+                </button>
+                <button class="help-btn-inline" onclick="showHelp('createZone')" title="Guida Nuovo Campo">?</button>
+            </div>
+
+            <div id="competitionFieldContainer" style="display: none; margin-top: 10px;">
+                <!-- Rendered by JavaScript -->
             </div>
             </div><!-- /section-content -->
         </div>
 
-        <!-- GPS Tracking Section - Collapsible -->
+        <!-- 6. GPS Tracking Section -->
         <div class="sidebar-section collapsible collapsed" id="gpsTrackingSection">
             <h3 onclick="toggleSection('gpsTrackingSection')">
                 <i class="fas fa-ship"></i>
@@ -2352,7 +1998,361 @@
             </div>
         </div>
 
-        <!-- Legend Section -->
+        <!-- 7. Catch Log Section -->
+        <div class="sidebar-section collapsible collapsed" id="catchLogSection">
+            <h3 onclick="toggleSection('catchLogSection')">
+                <i class="fas fa-fish"></i>
+                <span class="section-title-text">Catch Log</span>
+                <button class="help-btn" onclick="event.stopPropagation(); showHelp('catchLog')" title="Guida">?</button>
+                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
+            </h3>
+            <div class="section-content">
+
+            <!-- Pulsanti Segna Punto (modalita normale) -->
+            <div id="normalCatchControls" class="catch-controls" style="display: flex; gap: 6px; margin-bottom: 10px; align-items: center;">
+                <button id="catchModeBtn" class="ruler-btn primary" onclick="toggleCatchMode()" style="flex: 1;">
+                    <i class="fas fa-map-marker-alt"></i> Segna
+                </button>
+                <button class="ruler-btn secondary" onclick="useCurrentGPS()" style="flex: 1;">
+                    <i class="fas fa-location-arrow"></i> GPS
+                </button>
+                <button class="help-btn-inline" onclick="showHelp('catchMark')" title="Guida Segna Punto">?</button>
+            </div>
+
+            <!-- Statistiche giornata -->
+            <div id="catchStats" class="catch-stats">
+                <div class="catch-stat-item">
+                    <span class="stat-number" id="todayCount">0</span>
+                    <span class="stat-label">Oggi</span>
+                </div>
+                <div class="catch-stat-item">
+                    <span class="stat-number" id="totalCount">0</span>
+                    <span class="stat-label">Totale</span>
+                </div>
+            </div>
+
+            <!-- Filtri -->
+            <div class="catch-filters" style="margin-top: 10px;">
+                <select id="catchFilterType" class="zone-select" onchange="applyCatchFilters()" style="margin-bottom: 6px;">
+                    <option value="all">Tutti i tipi</option>
+                    <option value="strike">Strike</option>
+                    <option value="release">Rilascio</option>
+                    <option value="sighting">Avvistamento</option>
+                    <option value="weighed_catch">Cattura Pesata</option>
+                </select>
+                <select id="catchFilterSpecies" class="zone-select" onchange="applyCatchFilters()">
+                    <option value="all">Tutte le specie</option>
+                </select>
+            </div>
+
+            <!-- Lista catture scrollabile -->
+            <div id="catchListContainer" class="catch-list-container">
+                <div class="catch-list-empty">
+                    <i class="fas fa-fish"></i>
+                    <p>Nessuna cattura registrata</p>
+                    <small>Clicca "Registra" e poi sulla mappa</small>
+                </div>
+            </div>
+
+            <!-- Azioni Export -->
+            <div class="catch-export-actions" style="margin-top: 10px; display: flex; gap: 6px;">
+                <button class="competition-field-btn" style="flex: 1; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);" onclick="exportCatchesJSON()">
+                    <i class="fas fa-download"></i> JSON
+                </button>
+                <button class="competition-field-btn" style="flex: 1; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);" onclick="exportCatchesCSV()">
+                    <i class="fas fa-file-csv"></i> CSV
+                </button>
+            </div>
+            </div><!-- /section-content -->
+        </div>
+
+        <!-- 8. Ruler Section -->
+        <div class="sidebar-section collapsible collapsed" id="rulerSection">
+            <h3 onclick="toggleSection('rulerSection')">
+                <i class="fas fa-ruler"></i>
+                <span class="section-title-text">Righello</span>
+                <button class="help-btn" onclick="event.stopPropagation(); showHelp('ruler')" title="Guida">?</button>
+                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
+            </h3>
+            <div class="section-content">
+            <div class="ruler-controls">
+                <button id="rulerToggleBtn" class="ruler-btn primary" onclick="toggleRuler()">
+                    <i class="fas fa-ruler"></i> Misura
+                </button>
+                <button id="rulerEditBtn" class="ruler-btn secondary" onclick="toggleEditMode()" style="display:none;">
+                    <i class="fas fa-edit"></i> Modifica
+                </button>
+                <button class="ruler-btn secondary" onclick="clearRuler()">
+                    <i class="fas fa-trash"></i> Pulisci
+                </button>
+            </div>
+            <div id="rulerResult" class="ruler-result">
+                <!-- Sezione Distanza (visibile durante misurazione lineare) -->
+                <div id="rulerDistanceSection">
+                    <div class="ruler-result-title"><i class="fas fa-route"></i> Distanza Totale</div>
+                    <div class="ruler-distance">
+                        <div class="ruler-value">
+                            <span id="rulerNm" class="number">0.00</span>
+                            <span class="unit">Miglia Nautiche</span>
+                        </div>
+                        <div class="ruler-value">
+                            <span id="rulerKm" class="number">0.00</span>
+                            <span class="unit">Chilometri</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Sezione Superficie (visibile per poligoni chiusi) -->
+                <div id="rulerAreaSection" style="display: none;">
+                    <div class="ruler-result-title"><i class="fas fa-vector-square"></i> Superficie Campo</div>
+                    <div class="ruler-distance">
+                        <div class="ruler-value">
+                            <span id="rulerAreaNmSq" class="number">0.00</span>
+                            <span class="unit">nm<sup>2</sup></span>
+                        </div>
+                        <div class="ruler-value">
+                            <span id="rulerAreaKmSq" class="number">0.00</span>
+                            <span class="unit">km<sup>2</sup></span>
+                        </div>
+                    </div>
+                </div>
+                <div id="rulerPoints" class="ruler-points">Clicca sulla mappa per aggiungere punti</div>
+            </div>
+            </div><!-- /section-content -->
+        </div>
+
+        <!-- 9. Fishing Layers Section -->
+        <div class="sidebar-section collapsible collapsed" id="fishingSection">
+            <h3 onclick="toggleSection('fishingSection')">
+                <i class="fas fa-fish"></i>
+                <span class="section-title-text">Layer Pesca Sportiva</span>
+                <button class="help-btn" onclick="event.stopPropagation(); showHelp('fishing')" title="Guida">?</button>
+                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
+            </h3>
+            <div class="section-content">
+            <div class="layer-item" data-coverage="global">
+                <input type="checkbox" id="layerSST">
+                <label for="layerSST">
+                    <div class="layer-title">
+                        Temperatura Mare (SST)
+                        <a href="https://coralreefwatch.noaa.gov/product/5km/index.php" target="_blank" class="info-link" title="Info NOAA SST"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge global">Globale</span>
+                    </div>
+                    <div class="layer-desc">Fondamentale per pelagici</div>
+                </label>
+            </div>
+            <div class="layer-item" data-coverage="global">
+                <input type="checkbox" id="layerChlorophyll">
+                <label for="layerChlorophyll">
+                    <div class="layer-title">
+                        Clorofilla
+                        <a href="https://marine.copernicus.eu/" target="_blank" class="info-link" title="Info Copernicus Marine"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge global">Globale</span>
+                    </div>
+                    <div class="layer-desc">Produttività = pesce foraggio</div>
+                </label>
+            </div>
+            <div class="layer-item" data-coverage="global">
+                <input type="checkbox" id="layerCurrents">
+                <label for="layerCurrents">
+                    <div class="layer-title">
+                        Correnti Marine
+                        <a href="https://marine.copernicus.eu/" target="_blank" class="info-link" title="Info Copernicus Marine"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge global">Globale</span>
+                    </div>
+                    <div class="layer-desc">Direzione e intensità</div>
+                </label>
+            </div>
+            <div class="layer-item" data-coverage="global">
+                <input type="checkbox" id="layerWaves">
+                <label for="layerWaves">
+                    <div class="layer-title">
+                        Altezza Onde
+                        <a href="https://marine.copernicus.eu/" target="_blank" class="info-link" title="Info Copernicus Marine"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge global">Globale</span>
+                    </div>
+                    <div class="layer-desc">Condizioni meteo marine</div>
+                </label>
+            </div>
+            <div class="layer-item" data-coverage="global">
+                <input type="checkbox" id="layerWinds">
+                <label for="layerWinds">
+                    <div class="layer-title">
+                        Vento
+                        <a href="https://openweathermap.org/api/weathermaps" target="_blank" class="info-link" title="Info OpenWeatherMap"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge global">Globale</span>
+                    </div>
+                    <div class="layer-desc">Direzione e velocità</div>
+                </label>
+            </div>
+            </div><!-- /section-content -->
+        </div>
+
+        <!-- 10. Bathymetry Layers Section -->
+        <div class="sidebar-section collapsible collapsed" id="bathymetrySection">
+            <h3 onclick="toggleSection('bathymetrySection')">
+                <i class="fas fa-water"></i>
+                <span class="section-title-text">Batimetria</span>
+                <button class="help-btn" onclick="event.stopPropagation(); showHelp('bathymetry')" title="Guida">?</button>
+                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
+            </h3>
+            <div class="section-content">
+            <div class="layer-item" data-coverage="europe">
+                <input type="checkbox" id="layerBathy" checked>
+                <label for="layerBathy">
+                    <div class="layer-title">
+                        EMODnet Batimetria
+                        <a href="https://emodnet.ec.europa.eu/en/bathymetry" target="_blank" class="info-link" title="Info EMODnet"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge europe">Europa</span>
+                    </div>
+                    <div class="layer-desc">Profondità con scala colori</div>
+                </label>
+            </div>
+            <div class="layer-item" data-coverage="europe">
+                <input type="checkbox" id="layerBathyHR">
+                <label for="layerBathyHR">
+                    <div class="layer-title">
+                        Alta Risoluzione (HR)
+                        <a href="https://emodnet.ec.europa.eu/en/bathymetry" target="_blank" class="info-link" title="Info EMODnet HR"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge europe">Europa</span>
+                    </div>
+                    <div class="layer-desc">Dettaglio maggiore dove disponibile</div>
+                </label>
+            </div>
+            <div class="layer-item" data-coverage="global">
+                <input type="checkbox" id="layerGEBCO">
+                <label for="layerGEBCO">
+                    <div class="layer-title">
+                        GEBCO 2024 WMS
+                        <a href="https://www.gebco.net/data-products/gebco-web-services/web-map-service" target="_blank" class="info-link" title="Info GEBCO WMS"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge global">Globale</span>
+                    </div>
+                    <div class="layer-desc">Griglia batimetrica ufficiale mondiale</div>
+                </label>
+            </div>
+            <div class="layer-item" data-coverage="usa">
+                <input type="checkbox" id="layerBlueTopo">
+                <label for="layerBlueTopo">
+                    <div class="layer-title">
+                        NOAA BlueTopo
+                        <a href="https://nauticalcharts.noaa.gov/data/bluetopo.html" target="_blank" class="info-link" title="Info BlueTopo"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge usa">USA</span>
+                    </div>
+                    <div class="layer-desc">Batimetria navale alta precisione</div>
+                </label>
+            </div>
+            <div class="layer-item" data-coverage="global">
+                <input type="checkbox" id="layerETOPO">
+                <label for="layerETOPO">
+                    <div class="layer-title">
+                        Esri Ocean Base
+                        <a href="https://www.arcgis.com/home/item.html?id=1e126e7520f9466c9ca28b8f28b5e500" target="_blank" class="info-link" title="Info Esri Ocean"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge global">Globale</span>
+                    </div>
+                    <div class="layer-desc">Batimetria mondiale (consigliato)</div>
+                </label>
+            </div>
+            <div class="layer-item" data-coverage="global">
+                <input type="checkbox" id="layerOceanRef">
+                <label for="layerOceanRef">
+                    <div class="layer-title">
+                        Etichette Profondità
+                        <a href="https://carto.com/basemaps/" target="_blank" class="info-link" title="Info CartoDB"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge global">Globale</span>
+                    </div>
+                    <div class="layer-desc">Nomi e annotazioni oceaniche</div>
+                </label>
+            </div>
+            <div class="layer-item" data-coverage="europe">
+                <input type="checkbox" id="layerContours">
+                <label for="layerContours">
+                    <div class="layer-title">
+                        Isobate (linee profondità)
+                        <a href="https://emodnet.ec.europa.eu/en/bathymetry" target="_blank" class="info-link" title="Info EMODnet"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge europe">Europa</span>
+                    </div>
+                    <div class="layer-desc">Linee ravvicinate = pendenza ripida</div>
+                </label>
+            </div>
+            </div><!-- /section-content -->
+        </div>
+
+        <!-- 11. Base Layers Section -->
+        <div class="sidebar-section collapsible collapsed" id="baseLayersSection">
+            <h3 onclick="toggleSection('baseLayersSection')">
+                <i class="fas fa-layer-group"></i>
+                <span class="section-title-text">Layer Base</span>
+                <button class="help-btn" onclick="event.stopPropagation(); showHelp('baseLayers')" title="Guida">?</button>
+                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
+            </h3>
+            <div class="section-content">
+            <div class="layer-item" data-coverage="global">
+                <input type="checkbox" id="layerSeamarks" checked>
+                <label for="layerSeamarks">
+                    <div class="layer-title">
+                        Segnali nautici
+                        <a href="https://wiki.openseamap.org/wiki/OpenSeaMap-dev:Portal" target="_blank" class="info-link" title="Info OpenSeaMap"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge global">Globale</span>
+                    </div>
+                    <div class="layer-desc">Boe, fari, rotte</div>
+                </label>
+            </div>
+            <div class="layer-item" data-coverage="global">
+                <input type="checkbox" id="layerHarbours">
+                <label for="layerHarbours">
+                    <div class="layer-title">
+                        Porti e marine
+                        <a href="https://wiki.openseamap.org/wiki/OpenSeaMap-dev:Portal" target="_blank" class="info-link" title="Info OpenSeaMap"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge global">Globale</span>
+                    </div>
+                    <div class="layer-desc">Approdi e servizi</div>
+                </label>
+            </div>
+            <div class="layer-item" data-coverage="global">
+                <input type="checkbox" id="layerSatellite">
+                <label for="layerSatellite">
+                    <div class="layer-title">
+                        Satellite
+                        <a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9" target="_blank" class="info-link" title="Info Esri Satellite"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge global">Globale</span>
+                    </div>
+                    <div class="layer-desc">Immagini satellitari</div>
+                </label>
+            </div>
+            <div class="layer-item" data-coverage="europe">
+                <input type="checkbox" id="layerMPA">
+                <label for="layerMPA">
+                    <div class="layer-title">
+                        Aree Marine Protette
+                        <a href="https://emodnet.ec.europa.eu/en/human-activities" target="_blank" class="info-link" title="Info EMODnet Human Activities"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge europe">Europa</span>
+                    </div>
+                    <div class="layer-desc">Zone con restrizioni pesca</div>
+                </label>
+            </div>
+            </div><!-- /section-content -->
+        </div>
+
+        <!-- Display Controls Section -->
+        <div class="sidebar-section collapsible collapsed" id="displaySection">
+            <h3 onclick="toggleSection('displaySection')">
+                <i class="fas fa-sliders-h"></i>
+                <span class="section-title-text">Controlli Display</span>
+                <button class="help-btn" onclick="event.stopPropagation(); showHelp('display')" title="Guida">?</button>
+                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
+            </h3>
+            <div class="section-content">
+            <div class="slider-control">
+                <label>Opacità batimetria: <span id="opacityValue">40%</span></label>
+                <input type="range" id="opacitySlider" min="0" max="100" value="40">
+            </div>
+            <div class="slider-control">
+                <label>Luminosità mappa: <span id="brightnessValue">100%</span></label>
+                <input type="range" id="brightnessSlider" min="50" max="200" value="100">
+            </div>
+            </div><!-- /section-content -->
+        </div>
+
+        <!-- 13. Legend Section -->
         <div class="sidebar-section collapsible collapsed" id="legendSection">
             <h3 onclick="toggleSection('legendSection')">
                 <i class="fas fa-palette"></i>
@@ -2948,22 +2948,36 @@
             const mapEl = document.getElementById('map');
             const isMobile = window.innerWidth <= 768;
 
-            // Toggle both classes for desktop/mobile compatibility
-            sidebar.classList.toggle('collapsed');
-            sidebar.classList.toggle('open');
+            if (isMobile) {
+                // Su mobile usa solo 'open' (sidebar parte chiusa)
+                sidebar.classList.toggle('open');
+                const isOpen = sidebar.classList.contains('open');
 
-            const isHidden = sidebar.classList.contains('collapsed');
-
-            if (isHidden) {
-                toggleBtn.style.left = '0';
-                if (!isMobile) mapEl.style.left = '0';
-                toggleIcon.classList.remove('fa-chevron-left');
-                toggleIcon.classList.add('fa-chevron-right');
+                if (isOpen) {
+                    toggleBtn.style.left = '280px';
+                    toggleIcon.classList.remove('fa-chevron-right');
+                    toggleIcon.classList.add('fa-chevron-left');
+                } else {
+                    toggleBtn.style.left = '0';
+                    toggleIcon.classList.remove('fa-chevron-left');
+                    toggleIcon.classList.add('fa-chevron-right');
+                }
             } else {
-                toggleBtn.style.left = isMobile ? '280px' : '320px';
-                if (!isMobile) mapEl.style.left = '320px';
-                toggleIcon.classList.remove('fa-chevron-right');
-                toggleIcon.classList.add('fa-chevron-left');
+                // Su desktop usa 'collapsed' (sidebar parte aperta)
+                sidebar.classList.toggle('collapsed');
+                const isHidden = sidebar.classList.contains('collapsed');
+
+                if (isHidden) {
+                    toggleBtn.style.left = '0';
+                    mapEl.style.left = '0';
+                    toggleIcon.classList.remove('fa-chevron-left');
+                    toggleIcon.classList.add('fa-chevron-right');
+                } else {
+                    toggleBtn.style.left = '320px';
+                    mapEl.style.left = '320px';
+                    toggleIcon.classList.remove('fa-chevron-right');
+                    toggleIcon.classList.add('fa-chevron-left');
+                }
             }
 
             // Invalidate map size to fix tile rendering
@@ -4915,11 +4929,23 @@ Questa azione non puo essere annullata.`)) {
             showToast('Campo aggiornato', `Centro spostato a ${newLat.toFixed(4)}, ${newLng.toFixed(4)}`, 'success', 3000);
         }
 
+        // Inizializza icona toggle sidebar per mobile
+        function initMobileSidebarIcon() {
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                const toggleIcon = document.getElementById('toggleIcon');
+                // Su mobile sidebar parte chiusa, icona deve essere > (apri)
+                toggleIcon.classList.remove('fa-chevron-left');
+                toggleIcon.classList.add('fa-chevron-right');
+            }
+        }
+
         // Inizializza dropdown al caricamento
         document.addEventListener('DOMContentLoaded', function() {
             loadUserZones();  // Carica zone salvate dall'utente
             populateZoneSelect();
             initCrosshair();  // Inizializza mirino centrale
+            initMobileSidebarIcon();  // Fix icona toggle su mobile
         });
 
         // Fallback se DOMContentLoaded già passato
@@ -4928,6 +4954,7 @@ Questa azione non puo essere annullata.`)) {
                 loadUserZones();
                 populateZoneSelect();
                 initCrosshair();  // Inizializza mirino centrale
+                initMobileSidebarIcon();  // Fix icona toggle su mobile
             }, 100);
         }
 
