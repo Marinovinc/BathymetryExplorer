@@ -149,10 +149,12 @@
             left: 0;
             width: 320px;
             height: calc(100vh - 60px);
+            height: calc(100dvh - 60px); /* iOS Safari fix */
             background: rgba(15, 23, 42, 0.98);
             z-index: 1000;
             overflow-y: auto;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: max(20px, env(safe-area-inset-bottom)); /* iPhone home indicator */
         }
 
         .sidebar-section {
@@ -968,8 +970,10 @@
                 width: 280px;
                 transform: translateX(-280px);
                 height: calc(100vh - 60px);
+                height: calc(100dvh - 60px); /* iOS Safari dynamic viewport */
                 overflow-y: auto;
                 -webkit-overflow-scrolling: touch; /* Smooth scroll iOS */
+                padding-bottom: max(30px, env(safe-area-inset-bottom)); /* iPhone home indicator extra space */
             }
 
             .sidebar.open {
