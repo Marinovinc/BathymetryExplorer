@@ -957,18 +957,18 @@
         @media (max-width: 768px) {
             .sidebar {
                 width: 280px;
-            }
-
-            #map {
-                left: 0;
-            }
-
-            .sidebar {
                 transform: translateX(-280px);
+                height: calc(100vh - 60px);
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch; /* Smooth scroll iOS */
             }
 
             .sidebar.open {
                 transform: translateX(0);
+            }
+
+            #map {
+                left: 0;
             }
 
             .toggle-sidebar {
@@ -992,8 +992,6 @@
             .sidebar-section .section-content {
                 padding: 8px;
                 font-size: 0.75rem;
-                max-height: 250px;
-                overflow-y: auto;
             }
 
             .sidebar-section input,
