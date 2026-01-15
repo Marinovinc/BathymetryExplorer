@@ -9346,9 +9346,22 @@ Questa azione non puo essere annullata.`)) {
 
         // Helper: ottieni SW attivo
         async function getActiveServiceWorker() {
-            if (!('serviceWorker' in navigator)) return null;
-            const registration = await navigator.serviceWorker.ready;
-            return registration.active;
+            // Service Worker non funziona con file://
+            if (window.location.protocol === 'file:') {
+                showToast('Errore', 'Il download offline non funziona con file://. Usa http://localhost o GitHub Pages.', 'error', 5000);
+                return null;
+            }
+            if (!('serviceWorker' in navigator)) {
+                showToast('Errore', 'Service Worker non supportato dal browser.', 'error', 3000);
+                return null;
+            }
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                return registration.active;
+            } catch (e) {
+                console.error('[SW] Errore:', e);
+                return null;
+            }
         }
 
         // Scarica area corrente per uso offline
