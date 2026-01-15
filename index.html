@@ -1661,6 +1661,9 @@
             <div class="divider">oppure</div>
             <div class="search-group">
                 <label>Coordinate GPS</label>
+                <div class="current-coords-display" id="searchCurrentCoords" style="font-family: monospace; font-size: 0.85rem; color: #7dd3fc; margin-bottom: 8px; text-align: center;">
+                    <!-- Populated by updateInfoPanel -->
+                </div>
                 <div class="coords-row">
                     <input type="text" id="latInput" placeholder="Latitudine" value="">
                     <input type="text" id="lngInput" placeholder="Longitudine" value="">
@@ -3005,8 +3008,9 @@
 
         function updateInfoPanel() {
             const center = map.getCenter();
-            document.getElementById('currentCoords').textContent =
-                formatCoordDDM(center.lat, center.lng);
+            const coordsFormatted = formatCoordDDM(center.lat, center.lng);
+            document.getElementById('currentCoords').textContent = coordsFormatted;
+            document.getElementById('searchCurrentCoords').textContent = coordsFormatted;
             document.getElementById('currentZoom').textContent = map.getZoom();
         }
 
