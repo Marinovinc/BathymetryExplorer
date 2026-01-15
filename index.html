@@ -978,6 +978,34 @@
             .sidebar.open + .toggle-sidebar {
                 left: 280px;
             }
+
+            /* Sezioni più compatte su mobile */
+            .sidebar-section {
+                margin-bottom: 4px;
+            }
+
+            .sidebar-section h3 {
+                padding: 8px 10px;
+                font-size: 0.8rem;
+            }
+
+            .sidebar-section .section-content {
+                padding: 8px;
+                font-size: 0.75rem;
+                max-height: 250px;
+                overflow-y: auto;
+            }
+
+            .sidebar-section input,
+            .sidebar-section select,
+            .sidebar-section button {
+                padding: 6px 8px;
+                font-size: 0.75rem;
+            }
+
+            .sidebar-section .layer-item {
+                padding: 4px 0;
+            }
         }
 
         /* Darken Esri Ocean Base to balance with Satellite */
@@ -1604,6 +1632,66 @@
 
     <!-- Sidebar - All controls on left side -->
     <div class="sidebar" id="sidebar">
+        <!-- Offline Section - PRIORITÀ per mobile -->
+        <div class="sidebar-section collapsible collapsed" id="offlineSection">
+            <h3 onclick="toggleSection('offlineSection')">
+                <i class="fas fa-cloud-download-alt"></i>
+                <span class="section-title-text">Offline</span>
+                <button class="help-btn" onclick="event.stopPropagation(); showHelp('offline')" title="Guida">?</button>
+                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
+            </h3>
+            <div class="section-content">
+                <p style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 10px;">
+                    Scarica le mappe dal porto al campo di gara per navigare senza internet.
+                </p>
+
+                <!-- Selezione Campo di Gara -->
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px; display: block;">
+                        <i class="fas fa-flag-checkered"></i> Campo di Gara
+                    </label>
+                    <select id="offlineZoneSelect" style="width: 100%; padding: 8px; background: #1e293b; border: 1px solid rgba(148,163,184,0.3); border-radius: 6px; color: #e2e8f0; font-size: 0.8rem;">
+                        <option value="">-- Seleziona campo --</option>
+                    </select>
+                </div>
+
+                <!-- Info area da scaricare -->
+                <div id="offlineAreaInfo" style="display: none; background: rgba(14,165,233,0.1); border: 1px solid rgba(14,165,233,0.3); border-radius: 6px; padding: 8px; margin-bottom: 10px; font-size: 0.7rem;">
+                    <div style="color: #0ea5e9; font-weight: 600; margin-bottom: 4px;">
+                        <i class="fas fa-info-circle"></i> Area download:
+                    </div>
+                    <div id="offlineAreaDetails" style="color: #94a3b8;"></div>
+                </div>
+
+                <button id="downloadOfflineBtn" class="competition-field-btn" style="width: 100%; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);" onclick="downloadZoneForOffline()" disabled>
+                    <i class="fas fa-download"></i> Scarica Mappe Gara
+                </button>
+
+                <div id="offlineProgressContainer" style="display: none; margin-top: 10px;">
+                    <div style="background: #1e293b; border-radius: 4px; height: 8px; overflow: hidden;">
+                        <div id="offlineProgress" style="background: linear-gradient(90deg, #0ea5e9, #22c55e); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                    </div>
+                    <div id="offlineProgressText" style="font-size: 0.7rem; color: #94a3b8; margin-top: 4px; text-align: center;">
+                        Preparazione...
+                    </div>
+                </div>
+
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(148,163,184,0.2);">
+                    <div class="info-row" style="margin-bottom: 8px;">
+                        <span class="label">Cache salvata:</span>
+                        <span class="value" id="cacheSize">0 MB</span>
+                    </div>
+                    <button class="competition-field-btn" style="width: 100%; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); font-size: 0.75rem; padding: 6px;" onclick="clearOfflineCache()">
+                        <i class="fas fa-trash"></i> Pulisci Cache
+                    </button>
+                </div>
+
+                <div style="margin-top: 10px; font-size: 0.65rem; color: #64748b;">
+                    <i class="fas fa-info-circle"></i> Include: Porto partenza + Campo gara + 10nm buffer
+                </div>
+            </div><!-- /section-content -->
+        </div>
+
         <!-- Search Section -->
         <div class="sidebar-section collapsible collapsed" id="searchSection">
             <h3 onclick="toggleSection('searchSection')">
@@ -2343,65 +2431,6 @@
             </div><!-- /section-content -->
         </div>
 
-        <!-- Offline Section -->
-        <div class="sidebar-section collapsible collapsed" id="offlineSection">
-            <h3 onclick="toggleSection('offlineSection')">
-                <i class="fas fa-cloud-download-alt"></i>
-                <span class="section-title-text">Offline</span>
-                <button class="help-btn" onclick="event.stopPropagation(); showHelp('offline')" title="Guida">?</button>
-                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
-            </h3>
-            <div class="section-content">
-                <p style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 10px;">
-                    Scarica le mappe dal porto al campo di gara per navigare senza internet.
-                </p>
-
-                <!-- Selezione Campo di Gara -->
-                <div class="form-group" style="margin-bottom: 10px;">
-                    <label style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px; display: block;">
-                        <i class="fas fa-flag-checkered"></i> Campo di Gara
-                    </label>
-                    <select id="offlineZoneSelect" style="width: 100%; padding: 8px; background: #1e293b; border: 1px solid rgba(148,163,184,0.3); border-radius: 6px; color: #e2e8f0; font-size: 0.8rem;">
-                        <option value="">-- Seleziona campo --</option>
-                    </select>
-                </div>
-
-                <!-- Info area da scaricare -->
-                <div id="offlineAreaInfo" style="display: none; background: rgba(14,165,233,0.1); border: 1px solid rgba(14,165,233,0.3); border-radius: 6px; padding: 8px; margin-bottom: 10px; font-size: 0.7rem;">
-                    <div style="color: #0ea5e9; font-weight: 600; margin-bottom: 4px;">
-                        <i class="fas fa-info-circle"></i> Area download:
-                    </div>
-                    <div id="offlineAreaDetails" style="color: #94a3b8;"></div>
-                </div>
-
-                <button id="downloadOfflineBtn" class="competition-field-btn" style="width: 100%; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);" onclick="downloadZoneForOffline()" disabled>
-                    <i class="fas fa-download"></i> Scarica Mappe Gara
-                </button>
-
-                <div id="offlineProgressContainer" style="display: none; margin-top: 10px;">
-                    <div style="background: #1e293b; border-radius: 4px; height: 8px; overflow: hidden;">
-                        <div id="offlineProgress" style="background: linear-gradient(90deg, #0ea5e9, #22c55e); height: 100%; width: 0%; transition: width 0.3s;"></div>
-                    </div>
-                    <div id="offlineProgressText" style="font-size: 0.7rem; color: #94a3b8; margin-top: 4px; text-align: center;">
-                        Preparazione...
-                    </div>
-                </div>
-
-                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(148,163,184,0.2);">
-                    <div class="info-row" style="margin-bottom: 8px;">
-                        <span class="label">Cache salvata:</span>
-                        <span class="value" id="cacheSize">0 MB</span>
-                    </div>
-                    <button class="competition-field-btn" style="width: 100%; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); font-size: 0.75rem; padding: 6px;" onclick="clearOfflineCache()">
-                        <i class="fas fa-trash"></i> Pulisci Cache
-                    </button>
-                </div>
-
-                <div style="margin-top: 10px; font-size: 0.65rem; color: #64748b;">
-                    <i class="fas fa-info-circle"></i> Include: Porto partenza + Campo gara + 10nm buffer
-                </div>
-            </div><!-- /section-content -->
-        </div>
     </div>
 
     <!-- Toggle sidebar button -->
