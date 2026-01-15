@@ -3006,7 +3006,7 @@
         function updateInfoPanel() {
             const center = map.getCenter();
             document.getElementById('currentCoords').textContent =
-                `${center.lat.toFixed(4)}, ${center.lng.toFixed(4)}`;
+                formatCoordDDM(center.lat, center.lng);
             document.getElementById('currentZoom').textContent = map.getZoom();
         }
 
@@ -8714,7 +8714,7 @@ Questa azione non puo essere annullata.`)) {
 
             // Coordinate
             document.getElementById('gpsCoords').textContent =
-                `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+                formatCoordDDM(lat, lng);
         }
 
         // Errore GPS
