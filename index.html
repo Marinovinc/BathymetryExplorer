@@ -2919,17 +2919,22 @@
             const toggleBtn = document.getElementById('toggleSidebar');
             const toggleIcon = document.getElementById('toggleIcon');
             const mapEl = document.getElementById('map');
+            const isMobile = window.innerWidth <= 768;
 
+            // Toggle both classes for desktop/mobile compatibility
             sidebar.classList.toggle('collapsed');
+            sidebar.classList.toggle('open');
 
-            if (sidebar.classList.contains('collapsed')) {
+            const isHidden = sidebar.classList.contains('collapsed');
+
+            if (isHidden) {
                 toggleBtn.style.left = '0';
-                mapEl.style.left = '0';
+                if (!isMobile) mapEl.style.left = '0';
                 toggleIcon.classList.remove('fa-chevron-left');
                 toggleIcon.classList.add('fa-chevron-right');
             } else {
-                toggleBtn.style.left = '320px';
-                mapEl.style.left = '320px';
+                toggleBtn.style.left = isMobile ? '280px' : '320px';
+                if (!isMobile) mapEl.style.left = '320px';
                 toggleIcon.classList.remove('fa-chevron-right');
                 toggleIcon.classList.add('fa-chevron-left');
             }
