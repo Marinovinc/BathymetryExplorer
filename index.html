@@ -2441,6 +2441,50 @@
             </div><!-- /section-content -->
         </div>
 
+        <!-- Settings Section - Impostazioni -->
+        <div class="sidebar-section collapsible collapsed" id="settingsSection">
+            <h3 onclick="toggleSection('settingsSection')">
+                <i class="fas fa-cog"></i>
+                <span class="section-title-text">Impostazioni</span>
+                <span class="collapse-icon"><i class="fas fa-chevron-down"></i></span>
+            </h3>
+            <div class="section-content">
+
+                <!-- WhatsApp per Gare -->
+                <div style="margin-bottom: 12px; padding: 10px; background: rgba(37,211,102,0.08); border-radius: 8px; border: 1px solid rgba(37,211,102,0.3);">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <i class="fab fa-whatsapp" style="color: #25d366; font-size: 1.2rem;"></i>
+                        <span style="color: #e2e8f0; font-weight: 600; font-size: 0.9rem;">WhatsApp Gare</span>
+                    </div>
+                    <p style="color: #94a3b8; font-size: 0.75rem; margin-bottom: 8px;">
+                        Invia automaticamente le catture durante le gare al contatto configurato.
+                    </p>
+
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px; display: block;">
+                            Numero WhatsApp (con prefisso)
+                        </label>
+                        <input type="tel" id="whatsappNumber"
+                               placeholder="+39 333 1234567"
+                               style="width: 100%; padding: 8px; background: #1e293b; border: 1px solid rgba(37,211,102,0.3); border-radius: 6px; color: #e2e8f0; font-size: 0.85rem;"
+                               onchange="saveWhatsAppNumber()">
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <input type="checkbox" id="whatsappEnabled" onchange="saveWhatsAppSettings()" style="width: 16px; height: 16px; accent-color: #25d366;">
+                        <label for="whatsappEnabled" style="color: #94a3b8; font-size: 0.8rem; cursor: pointer;">
+                            Invia catture durante gara
+                        </label>
+                    </div>
+
+                    <button onclick="testWhatsAppMessage()" style="width: 100%; padding: 8px; font-size: 0.8rem; background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); color: white; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <i class="fab fa-whatsapp"></i> Invia Messaggio Test
+                    </button>
+                </div>
+
+            </div><!-- /section-content -->
+        </div>
+
     </div>
 
     <!-- Toggle sidebar button -->
@@ -6042,6 +6086,70 @@ Questa azione non puo essere annullata.`)) {
             localStorage.setItem('bathyExplorerCatches', JSON.stringify(catches));
         }
 
+        // =============================================
+        // WHATSAPP INTEGRATION FOR TOURNAMENT MODE
+        // =============================================
+
+        function loadWhatsAppSettings() {
+            const number = localStorage.getItem('bathyExplorerWhatsAppNumber') || '';
+            const enabled = localStorage.getItem('bathyExplorerWhatsAppEnabled') === 'true';
+            const numberInput = document.getElementById('whatsappNumber');
+            const enabledCheck = document.getElementById('whatsappEnabled');
+            if (numberInput) numberInput.value = number;
+            if (enabledCheck) enabledCheck.checked = enabled;
+        }
+
+        function saveWhatsAppNumber() {
+            const number = document.getElementById('whatsappNumber').value.trim();
+            localStorage.setItem('bathyExplorerWhatsAppNumber', number);
+            showToast('Salvato', 'Numero WhatsApp salvato', 'success', 1500);
+        }
+
+        function saveWhatsAppSettings() {
+            const enabled = document.getElementById('whatsappEnabled').checked;
+            localStorage.setItem('bathyExplorerWhatsAppEnabled', enabled);
+            if (enabled) {
+                const number = document.getElementById('whatsappNumber').value.trim();
+                if (!number) {
+                    showToast('Attenzione', 'Inserisci un numero WhatsApp', 'warning', 2000);
+                    document.getElementById('whatsappEnabled').checked = false;
+                    localStorage.setItem('bathyExplorerWhatsAppEnabled', false);
+                } else {
+                    showToast('Attivato', 'Invio WhatsApp attivo durante le gare', 'success', 1500);
+                }
+            }
+        }
+
+        function testWhatsAppMessage() {
+            const number = document.getElementById('whatsappNumber').value.trim();
+            if (!number) {
+                showToast('Errore', 'Inserisci prima un numero WhatsApp', 'error', 2000);
+                return;
+            }
+            const cleanNumber = number.replace(/[^0-9+]/g, '');
+            const msg = '🎣 BathymetryExplorer - Test' + String.fromCharCode(10) + String.fromCharCode(10) + '✅ WhatsApp configurato!' + String.fromCharCode(10) + '📍 Catture inviate durante le gare.';
+            window.open('https://wa.me/' + cleanNumber + '?text=' + encodeURIComponent(msg), '_blank');
+        }
+
+        function sendWhatsAppCatch(catchData, type) {
+            const enabled = localStorage.getItem('bathyExplorerWhatsAppEnabled') === 'true';
+            const number = localStorage.getItem('bathyExplorerWhatsAppNumber');
+            if (!enabled || !number) return;
+            const cleanNumber = number.replace(/[^0-9+]/g, '');
+            const time = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const coords = formatCoordDDM(catchData.location.lat, catchData.location.lng);
+            const tournamentName = activeTournament?.name || 'Gara';
+            let emoji = type === 'release' ? '🐟' : '⚡';
+            let label = type === 'release' ? 'RILASCIO' : 'STRIKE';
+            let count = activeTournament?.catches.filter(c => c.type === type).length || 1;
+            const msg = '🎣 ' + tournamentName + String.fromCharCode(10) + String.fromCharCode(10) + emoji + ' ' + label + ' #' + count + '!' + String.fromCharCode(10) + '🕐 ' + time + String.fromCharCode(10) + '📍 ' + coords + String.fromCharCode(10) + String.fromCharCode(10) + '🗺️ https://www.google.com/maps?q=' + catchData.location.lat + ',' + catchData.location.lng;
+            window.open('https://wa.me/' + cleanNumber + '?text=' + encodeURIComponent(msg), '_blank');
+        }
+
+        document.addEventListener('DOMContentLoaded', loadWhatsAppSettings);
+
+        // =============================================
+
         // Inizializza Catch Log all'avvio
         function initCatchLog() {
             catches = getCatches();
@@ -7086,6 +7194,9 @@ Questa azione non puo essere annullata.`)) {
 
             updateTournamentUI();
             showToast('Strike!', `${new Date().toLocaleTimeString('it-IT')} - ${formatCoordDDM(lat, lng)}`, 'success', 2000);
+
+            // Invia notifica WhatsApp se abilitato
+            sendWhatsAppCatch(strike, 'strike');
         }
 
         function updateTournamentUI() {
@@ -7239,6 +7350,9 @@ Questa azione non puo essere annullata.`)) {
             closeStrikeDialog();
             updateTournamentUI();
             showToast('Rilascio Registrato', `${getSpeciesLabel(species)}`, 'success', 2000);
+
+            // Invia notifica WhatsApp se abilitato
+            sendWhatsAppCatch(catchData, 'release');
         }
 
         // Termina torneo
