@@ -3007,11 +3007,37 @@
         map.on('zoomend', updateInfoPanel);
 
         function updateInfoPanel() {
-            const center = map.getCenter();
-            const coordsFormatted = formatCoordDDM(center.lat, center.lng);
+            // Calcola le coordinate al punto del mirino (non map.getCenter())
+            const crosshairCoords = getCrosshairCoords();
+            const coordsFormatted = formatCoordDDM(crosshairCoords.lat, crosshairCoords.lng);
             document.getElementById('currentCoords').textContent = coordsFormatted;
             document.getElementById('searchCurrentCoords').textContent = coordsFormatted;
             document.getElementById('currentZoom').textContent = map.getZoom();
+        }
+
+        // Restituisce le coordinate geografiche al punto del mirino
+        function getCrosshairCoords() {
+            const crosshair = document.getElementById('mapCrosshair');
+            const mapContainer = document.getElementById('map');
+
+            if (!crosshair || !mapContainer) {
+                return map.getCenter();
+            }
+
+            // Calcola posizione centro mirino
+            const chRect = crosshair.getBoundingClientRect();
+            const mapRect = mapContainer.getBoundingClientRect();
+
+            const chCenterX = chRect.left + chRect.width / 2;
+            const chCenterY = chRect.top + chRect.height / 2;
+
+            // Converti in coordinate relative al container mappa
+            const relX = chCenterX - mapRect.left;
+            const relY = chCenterY - mapRect.top;
+
+            // Converti pixel in coordinate geografiche
+            const point = L.point(relX, relY);
+            return map.containerPointToLatLng(point);
         }
 
         // Search location using Nominatim
