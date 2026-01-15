@@ -1,9 +1,9 @@
-/**
+﻿/**
  * Service Worker - BathymetryExplorer PWA
  * Gestisce caching offline per mappe batimetriche
  */
 
-const CACHE_VERSION = 'v2.0.5';
+const CACHE_VERSION = 'v2.0.6';
 const CACHE_NAME = `bathyexplorer-${CACHE_VERSION}`;
 const TILES_CACHE = `bathyexplorer-tiles-${CACHE_VERSION}`;
 
