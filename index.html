@@ -47,7 +47,13 @@
             pointer-events: none;
             z-index: 500;
             opacity: 0.08;
-            transition: opacity 0.4s ease-out;
+            transition: opacity 0.4s ease-out, left 0.3s ease;
+        }
+        /* Mobile: crosshair sempre centrato */
+        @media (max-width: 768px) {
+            #mapCrosshair {
+                left: 50%;
+            }
         }
         #mapCrosshair.active {
             opacity: 0.6;
@@ -82,7 +88,7 @@
             transform: translate(-50%, -50%);
         }
 
-        /* Rosa dei Venti - piccola */
+        /* Rosa dei Venti - piccola e ruotabile */
         #compassRose {
             position: fixed;
             bottom: 80px;
@@ -93,16 +99,19 @@
             pointer-events: auto;
             cursor: pointer;
             opacity: 0.85;
-            transition: opacity 0.2s, transform 0.2s;
+            transition: opacity 0.2s;
         }
         #compassRose:hover {
             opacity: 1;
-            transform: scale(1.1);
         }
         #compassRose svg {
             width: 100%;
             height: 100%;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            transition: transform 0.15s ease-out;
+        }
+        #compassRose.compass-active svg {
+            filter: drop-shadow(0 2px 8px rgba(125,211,252,0.6));
         }
 
         /* Header */
@@ -2446,8 +2455,8 @@
         <div class="crosshair-dot"></div>
     </div>
 
-    <!-- Rosa dei Venti -->
-    <div id="compassRose" onclick="resetMapNorth()" title="Nord in alto (click per resettare)">
+    <!-- Rosa dei Venti - ruotabile con drag -->
+    <div id="compassRose" title="Trascina per ruotare la mappa, click per resettare">
         <svg viewBox="0 0 100 100">
             <!-- Cerchio sfondo -->
             <circle cx="50" cy="50" r="48" fill="rgba(15,23,42,0.85)" stroke="rgba(125,211,252,0.5)" stroke-width="1"/>
@@ -2946,6 +2955,7 @@
             const toggleBtn = document.getElementById('toggleSidebar');
             const toggleIcon = document.getElementById('toggleIcon');
             const mapEl = document.getElementById('map');
+            const crosshair = document.getElementById('mapCrosshair');
             const isMobile = window.innerWidth <= 768;
 
             if (isMobile) {
@@ -2962,6 +2972,7 @@
                     toggleIcon.classList.remove('fa-chevron-left');
                     toggleIcon.classList.add('fa-chevron-right');
                 }
+                // Mobile: crosshair sempre centrato (gestito da CSS media query)
             } else {
                 // Su desktop usa 'collapsed' (sidebar parte aperta)
                 sidebar.classList.toggle('collapsed');
@@ -2972,11 +2983,15 @@
                     mapEl.style.left = '0';
                     toggleIcon.classList.remove('fa-chevron-left');
                     toggleIcon.classList.add('fa-chevron-right');
+                    // Crosshair centrato su tutto lo schermo
+                    if (crosshair) crosshair.style.left = '50%';
                 } else {
                     toggleBtn.style.left = '320px';
                     mapEl.style.left = '320px';
                     toggleIcon.classList.remove('fa-chevron-right');
                     toggleIcon.classList.add('fa-chevron-left');
+                    // Crosshair centrato sull'area mappa (escludendo sidebar 320px)
+                    if (crosshair) crosshair.style.left = 'calc(320px + (100% - 320px) / 2)';
                 }
             }
 
@@ -7387,13 +7402,140 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // ============================================
-        // ROSA DEI VENTI - Reset Nord in alto
+        // ROSA DEI VENTI - Rotazione mappa
         // ============================================
-        function resetMapNorth() {
-            // Leaflet di default ha sempre Nord in alto
-            // Questa funzione può essere estesa per mappe rotabili
-            showToast('Nord', 'La mappa è già orientata con il Nord in alto', 'info', 1500);
+        var mapRotation = 0; // Gradi di rotazione corrente
+        var compassDragging = false;
+        var compassStartAngle = 0;
+
+        // Inizializza la rosa dei venti con rotazione
+        function initCompassRose() {
+            const compass = document.getElementById('compassRose');
+            const mapContainer = document.getElementById('map');
+
+            // Mouse events per desktop
+            compass.addEventListener('mousedown', startCompassDrag);
+            document.addEventListener('mousemove', dragCompass);
+            document.addEventListener('mouseup', endCompassDrag);
+
+            // Touch events per mobile
+            compass.addEventListener('touchstart', startCompassDrag, { passive: false });
+            document.addEventListener('touchmove', dragCompass, { passive: false });
+            document.addEventListener('touchend', endCompassDrag);
+
+            // Click per reset
+            var lastDragTime = 0;
+            compass.addEventListener('click', function(e) {
+                // Ignora click subito dopo un drag (entro 300ms)
+                if (Date.now() - lastDragTime < 300) return;
+
+                if (Math.abs(mapRotation % 360) > 5) {
+                    // C'è rotazione, resetta al nord
+                    resetMapNorth();
+                } else {
+                    // Nessuna rotazione, mostra info
+                    showToast('Bussola', 'Trascina per ruotare la mappa', 'info', 1500);
+                }
+            });
+
+            // Track tempo ultimo drag
+            compass.addEventListener('mouseup', () => lastDragTime = Date.now());
+            compass.addEventListener('touchend', () => lastDragTime = Date.now());
+
+            // Prova ad attivare device orientation (bussola reale)
+            if (window.DeviceOrientationEvent) {
+                // iOS 13+ richiede permesso esplicito
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    compass.addEventListener('dblclick', requestCompassPermission);
+                } else {
+                    window.addEventListener('deviceorientationabsolute', handleDeviceOrientation, true);
+                    window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+                }
+            }
         }
+
+        function requestCompassPermission() {
+            DeviceOrientationEvent.requestPermission()
+                .then(response => {
+                    if (response === 'granted') {
+                        window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+                        showToast('Bussola attivata', 'La rosa ora segue il magnetometro', 'success', 2000);
+                        document.getElementById('compassRose').classList.add('compass-active');
+                    }
+                })
+                .catch(console.error);
+        }
+
+        function handleDeviceOrientation(event) {
+            // alpha = rotazione attorno all'asse z (bussola)
+            if (event.alpha !== null && !compassDragging) {
+                // Converti alpha in rotazione mappa (0 = nord)
+                let heading = event.alpha;
+                if (event.webkitCompassHeading) {
+                    heading = event.webkitCompassHeading; // Safari/iOS
+                }
+                setMapRotation(-heading);
+            }
+        }
+
+        function startCompassDrag(e) {
+            e.preventDefault();
+            compassDragging = true;
+            const compass = document.getElementById('compassRose');
+            const rect = compass.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            compassStartAngle = Math.atan2(clientY - centerY, clientX - centerX) * 180 / Math.PI - mapRotation;
+        }
+
+        function dragCompass(e) {
+            if (!compassDragging) return;
+            e.preventDefault();
+            const compass = document.getElementById('compassRose');
+            const rect = compass.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const currentAngle = Math.atan2(clientY - centerY, clientX - centerX) * 180 / Math.PI;
+            setMapRotation(currentAngle - compassStartAngle);
+        }
+
+        function endCompassDrag(e) {
+            if (compassDragging) {
+                compassDragging = false;
+                // Snap a 0 se vicino
+                if (Math.abs(mapRotation % 360) < 5 || Math.abs(mapRotation % 360) > 355) {
+                    resetMapNorth();
+                }
+            }
+        }
+
+        function setMapRotation(degrees) {
+            mapRotation = degrees;
+            // Ruota la rosa dei venti (indicatore)
+            const compassSvg = document.querySelector('#compassRose svg');
+            if (compassSvg) {
+                compassSvg.style.transform = `rotate(${degrees}deg)`;
+            }
+            // Ruota il container della mappa
+            const mapContainer = document.getElementById('map');
+            if (mapContainer) {
+                mapContainer.style.transform = `rotate(${degrees}deg)`;
+                mapContainer.style.transformOrigin = 'center center';
+            }
+        }
+
+        function resetMapNorth() {
+            mapRotation = 0;
+            setMapRotation(0);
+            showToast('Nord', 'Mappa orientata con il Nord in alto', 'success', 1500);
+        }
+
+        // Inizializza al caricamento
+        document.addEventListener('DOMContentLoaded', initCompassRose);
 
         // ============================================
         // BOAT TRACKING - Auto-center quando esce dalla mappa
