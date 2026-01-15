@@ -1,0 +1,17 @@
+# Node
+node_modules/
+
+# Test files
+test_*.py
+generate_icons*.js
+
+# Backups
+*.BACKUP_*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
