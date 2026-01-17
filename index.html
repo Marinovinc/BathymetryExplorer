@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -14,6 +14,7 @@
     <link rel="apple-touch-icon" href="icons/icon-152.png">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-velocity@2.1.4/dist/leaflet-velocity.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
         * {
@@ -858,7 +859,7 @@
             align-items: center;
             justify-content: center;
             z-index: 2000;
-            transition: opacity 0.5s;
+            transition: opacity 0.3s;
         }
 
         .loading.hidden {
@@ -1678,6 +1679,20 @@
             }
         }
     </style>
+
+    <!-- EARLY LOADING HIDE - Esegue prima del main script -->
+    <script>
+        // Nascondi loading dopo 1 secondo, indipendentemente dal main script
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var loading = document.getElementById('loading');
+                if (loading && !loading.classList.contains('hidden')) {
+                    loading.classList.add('hidden');
+                    console.log('[EARLY-DOM] Loading nascosto via DOMContentLoaded');
+                }
+            }, 1000);
+        });
+    </script>
 </head>
 <body>
     <!-- Loading Overlay -->
@@ -2261,14 +2276,25 @@
                 </label>
             </div>
             <div class="layer-item" data-coverage="global">
-                <input type="checkbox" id="layerWinds">
-                <label for="layerWinds">
+                <input type="checkbox" id="layerWindArrows">
+                <label for="layerWindArrows">
                     <div class="layer-title">
-                        Vento
-                        <a href="https://openweathermap.org/api/weathermaps" target="_blank" class="info-link" title="Info OpenWeatherMap"><i class="fas fa-info-circle"></i></a>
+                        <i class="fas fa-location-arrow" style="margin-right:4px;"></i> Vento Frecce
+                        <a href="https://open-meteo.com/" target="_blank" class="info-link" title="Info Open-Meteo"><i class="fas fa-info-circle"></i></a>
                         <span class="coverage-badge global">Globale</span>
                     </div>
-                    <div class="layer-desc">Direzione e velocità</div>
+                    <div class="layer-desc">Frecce direzione vento (Open-Meteo)</div>
+                </label>
+            </div>
+            <div class="layer-item" data-coverage="global">
+                <input type="checkbox" id="layerWindAnimation">
+                <label for="layerWindAnimation">
+                    <div class="layer-title">
+                        <i class="fas fa-wind" style="margin-right:4px;"></i> Vento Animato
+                        <a href="https://github.com/onaci/leaflet-velocity" target="_blank" class="info-link" title="Info Leaflet Velocity"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge global">Globale</span>
+                    </div>
+                    <div class="layer-desc">Animazione particelle stile Windy</div>
                 </label>
             </div>
             </div><!-- /section-content -->
@@ -2489,6 +2515,20 @@
                     <div class="legend-item"><div class="legend-color" style="background: #fde725;"></div> Alta</div>
                 </div>
             </div>
+            <!-- Wind Legend -->
+            <div>
+                <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 6px;"><i class="fas fa-wind"></i> Vento (scala Beaufort)</div>
+                <div class="legend-grid">
+                    <div class="legend-item"><div class="legend-color" style="background: #3b82f6;"></div> Calmo 0-1kn</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #22c55e;"></div> Bava 1-3kn</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #84cc16;"></div> Brezza 4-6kn</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #eab308;"></div> Moderato 7-10kn</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #f97316;"></div> Teso 11-16kn</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #ef4444;"></div> Fresco 17-21kn</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #dc2626;"></div> Forte 22-27kn</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #991b1b;"></div> Burrasca 28+kn</div>
+                </div>
+            </div>
             </div><!-- /section-content -->
         </div>
 
@@ -2617,8 +2657,17 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-velocity@2.1.4/dist/leaflet-velocity.min.js"></script>
     <script src="zones_data.js"></script>
     <script>
+        // EARLY HIDE: Nascondi loading dopo 800ms (prima che script finisca)
+        setTimeout(function() {
+            var el = document.getElementById('loading');
+            if (el) el.classList.add('hidden');
+            console.log('[EARLY] Loading nascosto');
+        }, 800);
+
+
         // Initialize map - default to Ischia, Italia
         const map = L.map('map', {
             center: [40.7300, 13.9000],
@@ -2650,7 +2699,7 @@
             transparent: true,
             opacity: 0.4,
             attribution: '© EMODnet Bathymetry'
-        }).addTo(map);
+        });
 
         // EMODnet High Resolution Bathymetry
         const bathyHRLayer = L.tileLayer.wms('https://ows.emodnet-bathymetry.eu/wms', {
@@ -2755,13 +2804,235 @@
             attribution: '© Copernicus Marine'
         });
 
-        // Wind layer (OpenWeatherMap style)
-        const windsLayer = L.tileLayer('https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=9de243494c0b295cca9337e1e96b00e2', {
-            attribution: '© OpenWeatherMap',
-            opacity: 0.6
-        });
-
         // ============================================
+        // WIND LAYERS - Arrows & Animation
+        // ============================================
+
+        // Wind Arrows Layer (Open-Meteo API)
+        let windArrowsLayer = L.layerGroup();
+        let windArrowMarkers = [];
+        let windArrowsLoading = false;
+
+        async function fetchWindArrows() {
+            if (windArrowsLoading) return;
+            windArrowsLoading = true;
+
+            // Clear existing markers
+            windArrowMarkers.forEach(m => windArrowsLayer.removeLayer(m));
+            windArrowMarkers = [];
+
+            const bounds = map.getBounds();
+            const zoom = map.getZoom();
+
+            // Calculate grid density based on zoom
+            let gridSize = zoom < 6 ? 3 : (zoom < 8 ? 2 : (zoom < 10 ? 1 : 0.5));
+            let latMin = Math.floor(bounds.getSouth() / gridSize) * gridSize;
+            let latMax = Math.ceil(bounds.getNorth() / gridSize) * gridSize;
+            let lngMin = Math.floor(bounds.getWest() / gridSize) * gridSize;
+            let lngMax = Math.ceil(bounds.getEast() / gridSize) * gridSize;
+
+            // Limit grid points
+            let points = [];
+            for (let lat = latMin; lat <= latMax; lat += gridSize) {
+                for (let lng = lngMin; lng <= lngMax; lng += gridSize) {
+                    if (points.length < 100) points.push({ lat, lng });
+                }
+            }
+
+            // Fetch wind data from Open-Meteo
+            for (const point of points) {
+                try {
+                    const url = `https://api.open-meteo.com/v1/forecast?latitude=${point.lat}&longitude=${point.lng}&current=wind_speed_10m,wind_direction_10m&wind_speed_unit=kn`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (data.current) {
+                        const speed = data.current.wind_speed_10m;
+                        const direction = data.current.wind_direction_10m;
+
+                        // Create arrow marker
+                        const arrowIcon = createWindArrowIcon(speed, direction);
+                        const marker = L.marker([point.lat, point.lng], {
+                            icon: arrowIcon,
+                            interactive: true
+                        });
+
+                        marker.bindTooltip(`${speed.toFixed(1)} kn<br>${direction}Â°`, {
+                            permanent: false,
+                            direction: 'top'
+                        });
+
+                        windArrowMarkers.push(marker);
+                        windArrowsLayer.addLayer(marker);
+                    }
+                } catch (e) {
+                    console.warn('Wind fetch error:', e);
+                }
+            }
+
+            windArrowsLoading = false;
+        }
+
+
+        // [WEATHER] createWindArrowIcon
+        function createWindArrowIcon(speed, direction) {
+            // Color based on wind speed (Beaufort scale colors)
+            let color = '#3b82f6'; // calm blue
+            if (speed > 1) color = '#22c55e';      // 1-3 kn green
+            if (speed > 6) color = '#84cc16';      // 4-6 kn lime
+            if (speed > 10) color = '#eab308';     // 7-10 kn yellow
+            if (speed > 16) color = '#f97316';     // 11-16 kn orange
+            if (speed > 21) color = '#ef4444';     // 17-21 kn red
+            if (speed > 27) color = '#dc2626';     // 22-27 kn dark red
+            if (speed > 33) color = '#991b1b';     // 28+ kn very dark red
+
+            // Arrow size based on speed
+            let size = Math.min(24 + speed * 0.5, 40);
+
+            // Convert FROM direction to TO direction (add 180) for consistency with animation
+            const directionTo = (direction + 180) % 360;
+
+            const svgArrow = `
+                <svg width="${size}" height="${size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(${directionTo}deg);">
+                    <path d="M12 2L6 12h4v10h4V12h4L12 2z" fill="${color}" stroke="#fff" stroke-width="0.5"/>
+                </svg>
+            `;
+
+            return L.divIcon({
+                html: svgArrow,
+                className: 'wind-arrow-icon',
+                iconSize: [size, size],
+                iconAnchor: [size/2, size/2]
+            });
+        }
+
+        // Wind Animation Layer (leaflet-velocity)
+        let windAnimationLayer = null;
+
+        async function initWindAnimation() {
+            if (windAnimationLayer) return;
+
+            try {
+                const bounds = map.getBounds();
+                const windData = await fetchRealWindField(bounds);
+
+                windAnimationLayer = L.velocityLayer({
+                    displayValues: true,
+                    displayOptions: {
+                        velocityType: 'Vento',
+                        displayPosition: 'bottomleft',
+                        displayEmptyString: 'Nessun dato vento',
+                        speedUnit: 'm/s',
+                        angleConvention: 'meteoCW'
+                    },
+                    data: windData,
+                    maxVelocity: 50,
+                    velocityScale: 0.005,
+                    particleAge: 60,
+                    lineWidth: 1.0,
+                    particleMultiplier: 0.001,
+                    colorScale: [
+                        '#3b82f6', '#22c55e', '#84cc16',
+                        '#eab308', '#f97316', '#ef4444', '#dc2626'
+                    ]
+                });
+
+            } catch (e) {
+                console.error('Wind animation init error:', e);
+                showToast('Errore caricamento animazione vento', 'error');
+            }
+        }
+
+        async function fetchRealWindField(bounds) {
+            const nx = 8;
+            const ny = 8;
+            const lo1 = bounds.getWest();
+            const la1 = bounds.getNorth();
+            const lo2 = bounds.getEast();
+            const la2 = bounds.getSouth();
+            const dx = (lo2 - lo1) / (nx - 1);
+            const dy = (la1 - la2) / (ny - 1);
+
+            const uData = [];
+            const vData = [];
+
+            // Build list of points
+            const points = [];
+            for (let j = 0; j < ny; j++) {
+                for (let i = 0; i < nx; i++) {
+                    const lat = la1 - j * dy;
+                    const lng = lo1 + i * dx;
+                    points.push({ lat, lng, index: j * nx + i });
+                }
+            }
+
+            // Initialize arrays with zeros
+            for (let k = 0; k < nx * ny; k++) {
+                uData.push(0);
+                vData.push(0);
+            }
+
+            // Fetch wind data from Open-Meteo for each point
+            const fetchPromises = points.map(async (point) => {
+                try {
+                    const url = `https://api.open-meteo.com/v1/forecast?latitude=`+point.lat.toFixed(2)+`&longitude=`+point.lng.toFixed(2)+`&current=wind_speed_10m,wind_direction_10m&wind_speed_unit=ms`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    if (data.current) {
+                        const speed = data.current.wind_speed_10m; // m/s (explicit)
+                        const direction = data.current.wind_direction_10m; // degrees, FROM direction
+                        
+                        // Convert FROM direction to TO direction (add 180)
+                        const dirTo = (direction + 180) % 360;
+                        const rad = dirTo * Math.PI / 180;
+                        
+                        // U = east component, V = north component
+                        uData[point.index] = speed * Math.sin(rad);
+                        vData[point.index] = speed * Math.cos(rad);
+                    }
+                } catch (e) {
+                    console.warn('Wind fetch error for point:', point, e);
+                }
+            });
+
+            // Wait for all fetches (with timeout)
+            await Promise.race([
+                Promise.all(fetchPromises),
+                new Promise(resolve => setTimeout(resolve, 10000)) // 10s timeout
+            ]);
+
+            console.log('Wind field fetched: ' + uData.filter(u => u !== 0).length + ' points with data');
+
+            return [
+                {
+                    header: {
+                        parameterUnit: 'm.s-1',
+                        parameterNumber: 2,
+                        parameterNumberName: 'U-component_of_wind',
+                        parameterCategory: 2,
+                        nx: nx, ny: ny,
+                        lo1: lo1, la1: la1, lo2: lo2, la2: la2,
+                        dx: dx, dy: dy
+                    },
+                    data: uData
+                },
+                {
+                    header: {
+                        parameterUnit: 'm.s-1',
+                        parameterNumber: 3,
+                        parameterNumberName: 'V-component_of_wind',
+                        parameterCategory: 2,
+                        nx: nx, ny: ny,
+                        lo1: lo1, la1: la1, lo2: lo2, la2: la2,
+                        dx: dx, dy: dy
+                    },
+                    data: vData
+                }
+            ];
+        }
+
+// ============================================
         // BASE / NAVIGATION LAYERS
         // ============================================
 
@@ -2769,7 +3040,7 @@
         const seamarkLayer = L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
             attribution: '© OpenSeaMap',
             opacity: 0.9
-        }).addTo(map);
+        });
 
         // OpenSeaMap harbours layer
         const harboursLayer = L.tileLayer('https://tiles.openseamap.org/harbours/{z}/{x}/{y}.png', {
@@ -2796,7 +3067,8 @@
         // ============================================
 
         // Helper function for simple layer toggle
-        function setupLayerToggle(checkboxId, layer) {
+         // [LAYERS] setupLayerToggle
+       function setupLayerToggle(checkboxId, layer) {
             const checkbox = document.getElementById(checkboxId);
             if (checkbox) {
                 checkbox.addEventListener('change', (e) => {
@@ -2820,7 +3092,32 @@
         setupLayerToggle('layerChlorophyll', chlorophyllLayer);
         setupLayerToggle('layerCurrents', currentsLayer);
         setupLayerToggle('layerWaves', wavesLayer);
-        setupLayerToggle('layerWinds', windsLayer);
+        // Wind Arrows Layer toggle (with data fetch)
+        document.getElementById('layerWindArrows')?.addEventListener('change', async (e) => {
+            if (e.target.checked) {
+                map.addLayer(windArrowsLayer);
+                await fetchWindArrows();
+                // Refresh on map move
+                map.on('moveend', fetchWindArrows);
+            } else {
+                map.removeLayer(windArrowsLayer);
+                map.off('moveend', fetchWindArrows);
+            }
+        });
+
+        // Wind Animation Layer toggle
+        document.getElementById('layerWindAnimation')?.addEventListener('change', async (e) => {
+            if (e.target.checked) {
+                await initWindAnimation();
+                if (windAnimationLayer) {
+                    map.addLayer(windAnimationLayer);
+                }
+            } else {
+                if (windAnimationLayer) {
+                    map.removeLayer(windAnimationLayer);
+                }
+            }
+        });
 
         // Base/navigation layers
         setupLayerToggle('layerSeamarks', seamarkLayer);
@@ -2851,7 +3148,8 @@
         };
 
         // Check if current map center is in Europe
-        function isInEurope() {
+         // [UTILS] isInEurope
+       function isInEurope() {
             const center = map.getCenter();
             return center.lat >= EUROPE_BOUNDS.south &&
                    center.lat <= EUROPE_BOUNDS.north &&
@@ -2860,7 +3158,8 @@
         }
 
         // Show toast notification
-        function showToast(title, message, type = 'warning', duration = 5000) {
+         // [UI] showToast
+       function showToast(title, message, type = 'warning', duration = 5000) {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
@@ -2899,6 +3198,8 @@
             hawaii: { north: 23, south: 18, west: -162, east: -154 }
         };
 
+
+        // [UTILS] isInUSA
         function isInUSA() {
             const center = map.getCenter();
             const lat = center.lat;
@@ -2923,7 +3224,8 @@
         }
 
         // Enhanced layer toggle with coverage check
-        function setupLayerToggleWithCoverage(checkboxId, layer) {
+         // [LAYERS] setupLayerToggleWithCoverage
+       function setupLayerToggleWithCoverage(checkboxId, layer) {
             const checkbox = document.getElementById(checkboxId);
             const layerItem = checkbox.closest('.layer-item');
             const coverage = layerItem?.dataset.coverage;
@@ -2978,7 +3280,8 @@
 
         // Check active Europe-only layers when moving out of Europe
         let lastInEurope = isInEurope();
-        function checkActiveLayers() {
+         // [LAYERS] checkActiveLayers
+       function checkActiveLayers() {
             const currentInEurope = isInEurope();
 
             // When leaving Europe, auto-switch to global layers
@@ -3072,7 +3375,8 @@
         });
 
         // Toggle sidebar function
-        function toggleSidebar() {
+         // [LAYERS] toggleSidebar
+       function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const toggleBtn = document.getElementById('toggleSidebar');
             const toggleIcon = document.getElementById('toggleIcon');
@@ -3125,6 +3429,8 @@
         map.on('moveend', updateInfoPanel);
         map.on('zoomend', updateInfoPanel);
 
+
+        // [UI] updateInfoPanel
         function updateInfoPanel() {
             // Calcola le coordinate al punto del mirino (non map.getCenter())
             const crosshairCoords = getCrosshairCoords();
@@ -3135,7 +3441,8 @@
         }
 
         // Restituisce le coordinate geografiche al punto del mirino
-        function getCrosshairCoords() {
+         // [UTILS] getCrosshairCoords
+       function getCrosshairCoords() {
             const crosshair = document.getElementById('mapCrosshair');
             const mapContainer = document.getElementById('map');
 
@@ -3200,12 +3507,16 @@
             }
         });
 
+
+        // [NAVIGATION] selectSearchResult
         function selectSearchResult(lat, lng, name) {
             searchInput.value = name.split(',')[0];
             searchResults.classList.remove('show');
             goToPlace(lat, lng, name);
         }
 
+
+        // [NAVIGATION] searchLocation
         function searchLocation() {
             const query = searchInput.value.trim();
             if (!query) return;
@@ -3233,6 +3544,8 @@
             }
         });
 
+
+        // [NAVIGATION] goToCoordinates
         function goToCoordinates() {
             const lat = parseFloat(document.getElementById('latInput').value);
             const lng = parseFloat(document.getElementById('lngInput').value);
@@ -3251,6 +3564,8 @@
             addMarker(lat, lng, `Coordinate: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
         }
 
+
+        // [NAVIGATION] goToPlace
         function goToPlace(lat, lng, name) {
             map.flyTo([lat, lng], 11, { duration: 2 });
             document.getElementById('currentPlace').textContent = name.split(',').slice(0, 2).join(', ');
@@ -3261,25 +3576,25 @@
 
         let currentMarker = null;
 
+
+        // [NAVIGATION] addMarker
         function addMarker(lat, lng, name) {
             if (currentMarker) {
                 map.removeLayer(currentMarker);
             }
 
             currentMarker = L.marker([lat, lng])
-                .addTo(map)
+                
                 .bindPopup(`<strong>${name.split(',')[0]}</strong><br>
                            Lat: ${lat.toFixed(4)}<br>
                            Lng: ${lng.toFixed(4)}`)
                 .openPopup();
         }
 
-        // Hide loading overlay
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('loading').classList.add('hidden');
-            }, 1000);
-        });
+        // Hide loading overlay SUBITO (non aspettare tile WMS)
+        setTimeout(() => {
+            document.getElementById('loading').classList.add('hidden');
+        }, 500);  // 500ms per rendering iniziale
 
         // Initial info panel update
         updateInfoPanel();
@@ -3291,6 +3606,41 @@
 
         // Add initial marker for Ischia
         addMarker(40.7300, 13.9000, 'Ischia, Italia');
+
+        
+        // ============================================
+        // LAZY LOADING - Carica layer in background
+        // ============================================
+
+        function initializeLazyLayers() {
+            // Nascondi loading subito - mappa base è pronta
+            const loadingEl = document.getElementById('loading');
+            if (loadingEl) {
+                loadingEl.classList.add('hidden');
+            }
+
+            // Carica layer pesanti in background con delay progressivo
+            const lazyLayers = [
+                { layer: bathyLayer, delay: 100, name: 'Bathymetry' },
+                { layer: typeof bathyHRLayer !== 'undefined' ? bathyHRLayer : null, delay: 200, name: 'Bathy HR' },
+                { layer: typeof gebcoLayer !== 'undefined' ? gebcoLayer : null, delay: 300, name: 'GEBCO' }
+            ];
+
+            lazyLayers.forEach(item => {
+                if (item.layer) {
+                    setTimeout(() => {
+                        // I layer vengono solo preparati, non aggiunti alla mappa
+                        // L'utente li attiva manualmente con i checkbox
+                        console.log(`[LazyLoad] ${item.name} pronto`);
+                    }, item.delay);
+                }
+            });
+
+            console.log('[LazyLoad] Inizializzazione completata');
+        }
+
+        // Lazy loading non necessario - loading nascosto subito
+
 
         // ============================================
         // FAVORITE PLACES MANAGEMENT
@@ -3307,18 +3657,21 @@
         let currentSearchedPlace = null;
 
         // Load saved places from localStorage
-        function getSavedPlaces() {
+         // [NAVIGATION] getSavedPlaces
+       function getSavedPlaces() {
             const saved = localStorage.getItem('bathyExplorerFavorites');
             return saved ? JSON.parse(saved) : [];
         }
 
         // Save places to localStorage
-        function savePlacesToStorage(places) {
+         // [NAVIGATION] savePlacesToStorage
+       function savePlacesToStorage(places) {
             localStorage.setItem('bathyExplorerFavorites', JSON.stringify(places));
         }
 
         // Render all places (default + saved)
-        function renderFavoritePlaces() {
+         // [NAVIGATION] renderFavoritePlaces
+       function renderFavoritePlaces() {
             const container = document.getElementById('quickLinksContainer');
             const savedPlaces = getSavedPlaces();
 
@@ -3349,7 +3702,8 @@
         }
 
         // Save current searched place to favorites
-        function saveCurrentToFavorites() {
+         // [WEATHER] saveCurrentToFavorites
+       function saveCurrentToFavorites() {
             if (!currentSearchedPlace) return;
 
             const savedPlaces = getSavedPlaces();
@@ -3387,7 +3741,8 @@
         }
 
         // Delete a saved place
-        function deleteFavoritePlace(index) {
+         // [NAVIGATION] deleteFavoritePlace
+       function deleteFavoritePlace(index) {
             if (!confirm('Eliminare questo luogo dai preferiti?')) return;
 
             const savedPlaces = getSavedPlaces();
@@ -3439,23 +3794,27 @@
         let competitionFieldMarker = null;
 
         // Load competition field from localStorage
-        function getCompetitionField() {
+         // [COMPETITION] getCompetitionField
+       function getCompetitionField() {
             const saved = localStorage.getItem('bathyExplorerCompetitionField');
             return saved ? JSON.parse(saved) : null;
         }
 
         // Save competition field to localStorage
-        function saveCompetitionFieldToStorage(field) {
+         // [COMPETITION] saveCompetitionFieldToStorage
+       function saveCompetitionFieldToStorage(field) {
             localStorage.setItem('bathyExplorerCompetitionField', JSON.stringify(field));
         }
 
         // Clear competition field from localStorage
-        function clearCompetitionFieldFromStorage() {
+         // [COMPETITION] clearCompetitionFieldFromStorage
+       function clearCompetitionFieldFromStorage() {
             localStorage.removeItem('bathyExplorerCompetitionField');
         }
 
         // Set competition field from current map center or input coordinates
-        function setCompetitionField() {
+         // [COMPETITION] setCompetitionField
+       function setCompetitionField() {
             const lat = parseFloat(document.getElementById('latInput').value);
             const lng = parseFloat(document.getElementById('lngInput').value);
 
@@ -3488,7 +3847,8 @@
         }
 
         // Render competition field in sidebar
-        function renderCompetitionField() {
+         // [COMPETITION] renderCompetitionField
+       function renderCompetitionField() {
             const container = document.getElementById('competitionFieldContainer');
             const field = getCompetitionField();
 
@@ -3518,7 +3878,8 @@
         }
 
         // Go to competition field
-        function goToCompetitionField() {
+         // [NAVIGATION] goToCompetitionField
+       function goToCompetitionField() {
             const field = getCompetitionField();
             if (!field) return;
 
@@ -3526,7 +3887,8 @@
         }
 
         // Clear competition field
-        function clearCompetitionField() {
+         // [COMPETITION] clearCompetitionField
+       function clearCompetitionField() {
             if (!confirm('Rimuovere il campo di gara?')) return;
 
             if (competitionFieldMarker) {
@@ -3546,7 +3908,8 @@
         }
 
         // Add competition field marker to map
-        function addCompetitionFieldMarker(field) {
+         // [NAVIGATION] addCompetitionFieldMarker
+       function addCompetitionFieldMarker(field) {
             // Remove existing marker
             if (competitionFieldMarker) {
                 map.removeLayer(competitionFieldMarker);
@@ -3585,7 +3948,8 @@
         let selectedZoneId = null;
 
         // Converte ZONES_DATA array in oggetto per lookup veloce
-        function getZonesMap() {
+         // [ZONES] getZonesMap
+       function getZonesMap() {
             const zonesMap = {};
             if (typeof ZONES_DATA !== 'undefined') {
                 ZONES_DATA.forEach(zone => {
@@ -3600,7 +3964,8 @@
         // ============================================
 
         // Carica zone utente dal localStorage
-        function loadUserZones() {
+         // [ZONES] loadUserZones
+       function loadUserZones() {
             const saved = localStorage.getItem('bathyExplorerUserZones');
             if (saved) {
                 const userZones = JSON.parse(saved);
@@ -3613,13 +3978,15 @@
         }
 
         // Salva zone utente nel localStorage
-        function saveUserZones() {
+         // [ZONES] saveUserZones
+       function saveUserZones() {
             const userZones = ZONES_DATA.filter(z => z.isUserCreated === true);
             localStorage.setItem('bathyExplorerUserZones', JSON.stringify(userZones));
         }
 
         // Elimina zona selezionata
-        function deleteSelectedZone() {
+         // [ZONES] deleteSelectedZone
+       function deleteSelectedZone() {
             const select = document.getElementById('zoneSelect');
             const zoneId = select.value;
 
@@ -3665,7 +4032,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Popola il dropdown con i campi di gara
-        function populateZoneSelect() {
+         // [ZONES] populateZoneSelect
+       function populateZoneSelect() {
             const select = document.getElementById('zoneSelect');
             if (!select) return;
 
@@ -3686,7 +4054,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Quando cambia la selezione nel dropdown
-        function onZoneSelectChange() {
+         // [ZONES] onZoneSelectChange
+       function onZoneSelectChange() {
             const select = document.getElementById('zoneSelect');
             const checkbox = document.getElementById('showZoneCheckbox');
 
@@ -3698,7 +4067,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Draw tournament zone on map
-        function drawTournamentZone(zoneId) {
+         // [ZONES] drawTournamentZone
+       function drawTournamentZone(zoneId) {
             const zonesMap = getZonesMap();
             const zone = zonesMap[zoneId];
             if (!zone) return;
@@ -3801,7 +4171,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Clear tournament zone from map
-        function clearTournamentZone() {
+         // [ZONES] clearTournamentZone
+       function clearTournamentZone() {
             if (zonePolygon) {
                 map.removeLayer(zonePolygon);
                 zonePolygon = null;
@@ -3817,7 +4188,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Toggle zone visibility via checkbox
-        function toggleZoneVisibility() {
+         // [LAYERS] toggleZoneVisibility
+       function toggleZoneVisibility() {
             const checkbox = document.getElementById('showZoneCheckbox');
             const select = document.getElementById('zoneSelect');
 
@@ -3841,7 +4213,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Vai al campo selezionato
-        function goToSelectedZone() {
+         // [NAVIGATION] goToSelectedZone
+       function goToSelectedZone() {
             const select = document.getElementById('zoneSelect');
             const checkbox = document.getElementById('showZoneCheckbox');
             const zoneId = select.value;
@@ -3865,7 +4238,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Esporta dati zone in JSON
-        function exportZonesData() {
+         // [ZONES] exportZonesData
+       function exportZonesData() {
             if (typeof ZONES_DATA === 'undefined' || ZONES_DATA.length === 0) {
                 showToast('Nessun dato', 'Nessun campo di gara da esportare', 'warning', 3000);
                 return;
@@ -3891,7 +4265,8 @@ Questa azione non puo essere annullata.`)) {
         // ============================================
 
         // Rende un dialog spostabile trascinando l'header
-        function makeDraggable(dialogElement, headerElement) {
+         // [OTHER] makeDraggable
+       function makeDraggable(dialogElement, headerElement) {
             let isDragging = false;
             let offsetX = 0;
             let offsetY = 0;
@@ -3953,7 +4328,8 @@ Questa azione non puo essere annullata.`)) {
         // ============================================
 
         // Mostra dialog per creare nuovo campo da centro + raggio
-        function showCreateZoneDialog() {
+         // [ZONES] showCreateZoneDialog
+       function showCreateZoneDialog() {
             // Usa centro mappa come default
             const center = map.getCenter();
 
@@ -4072,7 +4448,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Genera poligono dato centro, raggio e tipo
-        function generateCirclePolygon(centerLat, centerLng, radiusNm, type = 'circle', numPoints = 36) {
+         // [ZONES] generateCirclePolygon
+       function generateCirclePolygon(centerLat, centerLng, radiusNm, type = 'circle', numPoints = 36) {
             const vertices = [];
             const radiusKm = radiusNm * 1.852; // Converti nm in km
             const latOffset = radiusKm / 111.32;
@@ -4189,7 +4566,8 @@ Questa azione non puo essere annullata.`)) {
         var pendingZoneFormData = null;
 
         // Seleziona centro cliccando sulla mappa
-        function selectCenterFromMap() {
+         // [MAP] selectCenterFromMap
+       function selectCenterFromMap() {
             // Salva valori correnti del form
             pendingZoneFormData = {
                 name: document.getElementById('newZoneName').value,
@@ -4211,7 +4589,8 @@ Questa azione non puo essere annullata.`)) {
             document.getElementById('map').style.cursor = 'crosshair';
 
             // Handler click sulla mappa (one-shot)
-            function handleMapClick(e) {
+             // [MAP] handleMapClick
+           function handleMapClick(e) {
                 // Rimuovi handler
                 map.off('click', handleMapClick);
                 document.getElementById('map').style.cursor = '';
@@ -4224,7 +4603,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Riapre dialog creazione zona con coordinate precompilate
-        function reopenCreateZoneDialog(lat, lng) {
+         // [ZONES] reopenCreateZoneDialog
+       function reopenCreateZoneDialog(lat, lng) {
             // Apri dialog standard
             showCreateZoneDialog();
 
@@ -4260,7 +4640,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Crea zona dal dialog
-        function createZoneFromDialog() {
+         // [ZONES] createZoneFromDialog
+       function createZoneFromDialog() {
             const name = document.getElementById('newZoneName').value.trim();
             const tournament = document.getElementById('newZoneTournament').value.trim() || name;
             const lat = parseFloat(document.getElementById('newZoneLat').value);
@@ -4367,7 +4748,8 @@ Questa azione non puo essere annullata.`)) {
         var gatheringEditMarker = null;   // Marker punto di raduno draggabile
 
         // Abilita drag diretto del centro (click sul marker)
-        function enableDirectCenterDrag(zone) {
+         // [OTHER] enableDirectCenterDrag
+       function enableDirectCenterDrag(zone) {
             if (!zone || !zone.centerMeta) return;
 
             // Se gia in editing, esci
@@ -4397,7 +4779,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Mostra pannello floating per salva/annulla
-        function showDirectEditPanel() {
+         // [ZONES] showDirectEditPanel
+       function showDirectEditPanel() {
             if (directEditPanel) directEditPanel.remove();
 
             directEditPanel = document.createElement('div');
@@ -4470,7 +4853,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Salva modifiche editing diretto
-        function saveDirectEdit() {
+         // [FAVORITES] saveDirectEdit
+       function saveDirectEdit() {
             if (!editingCenterZoneId) return;
 
             const zone = ZONES_DATA.find(z => z.id === editingCenterZoneId);
@@ -4505,7 +4889,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Annulla editing diretto
-        function cancelDirectEdit() {
+         // [ZONES] cancelDirectEdit
+       function cancelDirectEdit() {
             if (!editingCenterZoneId) return;
 
             const zoneId = editingCenterZoneId;
@@ -4522,7 +4907,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Mostra dialog per editing centro campo
-        function showEditCenterDialog() {
+         // [ZONES] showEditCenterDialog
+       function showEditCenterDialog() {
             const select = document.getElementById('zoneSelect');
             const zoneId = select.value;
 
@@ -4660,7 +5046,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Aggiungi marker punto di raduno draggabile (verde con bandiera)
-        function addGatheringEditMarker(lat, lng, name) {
+         // [NAVIGATION] addGatheringEditMarker
+       function addGatheringEditMarker(lat, lng, name) {
             // Rimuovi marker esistente
             if (gatheringEditMarker) {
                 map.removeLayer(gatheringEditMarker);
@@ -4716,7 +5103,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Aggiunge un nuovo punto di raduno alla zona corrente
-        function addNewGatheringPoint() {
+         // [ZONES] addNewGatheringPoint
+       function addNewGatheringPoint() {
             if (!editingCenterZoneId) return;
 
             const zone = ZONES_DATA.find(z => z.id === editingCenterZoneId);
@@ -4762,7 +5150,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Aggiungi marker centrale draggabile
-        function addCenterEditMarker(lat, lng) {
+         // [NAVIGATION] addCenterEditMarker
+       function addCenterEditMarker(lat, lng) {
             clearCenterEditMarker();
 
             const centerIcon = L.divIcon({
@@ -4818,7 +5207,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Aggiungi marker draggabili sui vertici della zona
-        function addVertexEditMarkers() {
+         // [NAVIGATION] addVertexEditMarkers
+       function addVertexEditMarkers() {
             if (!editingCenterZoneId) return;
 
             const zone = ZONES_DATA.find(z => z.id === editingCenterZoneId);
@@ -4896,7 +5286,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Gestisce drag di un vertice - aggiorna poligono in tempo reale
-        function handleVertexDrag(index, newLat, newLng) {
+         // [ZONES] handleVertexDrag
+       function handleVertexDrag(index, newLat, newLng) {
             if (!editingCenterZoneId) return;
 
             const zone = ZONES_DATA.find(z => z.id === editingCenterZoneId);
@@ -4921,7 +5312,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Toggle modalita eliminazione vertici
-        function toggleDeleteMode(enabled) {
+         // [LAYERS] toggleDeleteMode
+       function toggleDeleteMode(enabled) {
             // Seleziona il div INTERNO dei marker (quello con lo stile visibile)
             const markers = document.querySelectorAll('.vertex-edit-marker div');
             markers.forEach(m => {
@@ -4941,7 +5333,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Gestisce eliminazione di un vertice con click
-        function handleVertexDelete(index) {
+         // [ZONES] handleVertexDelete
+       function handleVertexDelete(index) {
             if (!editingCenterZoneId) return;
 
             const zone = ZONES_DATA.find(z => z.id === editingCenterZoneId);
@@ -4983,7 +5376,8 @@ Questa azione non puo essere annullata.`)) {
 
         // Rimuovi marker centrale editing e marker vertici
         // clearZoneId = true solo quando si chiude veramente il dialog (Annulla/click sfondo)
-        function clearCenterEditMarker(clearZoneId = false) {
+         // [NAVIGATION] clearCenterEditMarker
+       function clearCenterEditMarker(clearZoneId = false) {
             if (centerEditMarker) {
                 map.removeLayer(centerEditMarker);
                 centerEditMarker = null;
@@ -5005,7 +5399,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Preview aggiornata durante drag
-        function updateZonePreview(newLat, newLng) {
+         // [ZONES] updateZonePreview
+       function updateZonePreview(newLat, newLng) {
             if (!editingCenterZoneId) return;
 
             const zone = ZONES_DATA.find(z => z.id === editingCenterZoneId);
@@ -5035,7 +5430,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Applica le modifiche al centro
-        function applyCenterEdit() {
+         // [ZONES] applyCenterEdit
+       function applyCenterEdit() {
             if (!editingCenterZoneId) {
                 showToast('Errore', 'Nessuna zona in editing', 'danger', 2000);
                 return;
@@ -5094,7 +5490,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Inizializza icona toggle sidebar per mobile
-        function initMobileSidebarIcon() {
+         // [UI] initMobileSidebarIcon
+       function initMobileSidebarIcon() {
             const isMobile = window.innerWidth <= 768;
             if (isMobile) {
                 const toggleIcon = document.getElementById('toggleIcon');
@@ -5155,7 +5552,8 @@ Questa azione non puo essere annullata.`)) {
         let tournaments = [];                // Storico tornei salvati
 
         // Converte coordinate decimali in formato gradi/minuti decimali (es. N 40° 29.700')
-        function formatCoordDDM(lat, lng) {
+         // [UTILS] formatCoordDDM
+       function formatCoordDDM(lat, lng) {
             const latDir = lat >= 0 ? 'N' : 'S';
             const lngDir = lng >= 0 ? 'E' : 'W';
             const latAbs = Math.abs(lat);
@@ -5203,7 +5601,8 @@ Questa azione non puo essere annullata.`)) {
         let customSpecies = JSON.parse(localStorage.getItem('bathyExplorerCustomSpecies') || '[]');
 
         // Restituisce lista completa specie (base + custom)
-        function getAllSpecies() {
+         // [CATCH_LOG] getAllSpecies
+       function getAllSpecies() {
             const customOptions = customSpecies.map(s => ({ id: 'custom_' + s.toLowerCase().replace(/\s+/g, '_'), label: s }));
             // Inserisci custom prima dell'opzione "Altra specie..."
             const baseWithoutCustom = SPECIES_LIST.filter(s => s.id !== '_custom_');
@@ -5211,14 +5610,16 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Aggiunge nuova specie personalizzata
-        function addCustomSpecies(name) {
+         // [CATCH_LOG] addCustomSpecies
+       function addCustomSpecies(name) {
             if (!name || customSpecies.includes(name)) return;
             customSpecies.push(name);
             localStorage.setItem('bathyExplorerCustomSpecies', JSON.stringify(customSpecies));
         }
 
         // Ottiene il label di una specie dato il suo ID
-        function getSpeciesLabel(speciesId) {
+         // [CATCH_LOG] getSpeciesLabel
+       function getSpeciesLabel(speciesId) {
             if (!speciesId) return null;
             const allSpecies = getAllSpecies();
             const found = allSpecies.find(s => s.id === speciesId);
@@ -5245,7 +5646,8 @@ Questa azione non puo essere annullata.`)) {
         ];
 
         // Calcola distanza tra due punti usando formula di Haversine
-        function haversineDistance(lat1, lon1, lat2, lon2) {
+         // [RULER] haversineDistance
+       function haversineDistance(lat1, lon1, lat2, lon2) {
             const R = 6371; // Raggio Terra in km
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -5258,7 +5660,8 @@ Questa azione non puo essere annullata.`)) {
 
         // Calcola area poligono usando formula di Shoelace con proiezione locale
         // Ritorna area in km quadrati
-        function calculatePolygonArea(points) {
+         // [ZONES] calculatePolygonArea
+       function calculatePolygonArea(points) {
             if (!points || points.length < 3) return 0;
 
             // Converti coordinate geografiche in coordinate proiettate (metri)
@@ -5289,18 +5692,21 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Converti km^2 in miglia nautiche quadrate
-        function kmSqToNauticalMilesSq(kmSq) {
+         // [UTILS] kmSqToNauticalMilesSq
+       function kmSqToNauticalMilesSq(kmSq) {
             // 1 nm = 1.852 km, quindi 1 nm^2 = 1.852^2 km^2 = 3.429904 km^2
             return kmSq / 3.429904;
         }
 
         // Converti km in miglia nautiche (1 nm = 1.852 km)
-        function kmToNauticalMiles(km) {
+         // [UTILS] kmToNauticalMiles
+       function kmToNauticalMiles(km) {
             return km / 1.852;
         }
 
         // Calcola distanza totale del percorso (opzionalmente includendo chiusura)
-        function calculateTotalDistance(includeClosing = false) {
+         // [RULER] calculateTotalDistance
+       function calculateTotalDistance(includeClosing = false) {
             let totalKm = 0;
             for (let i = 1; i < rulerPoints.length; i++) {
                 totalKm += haversineDistance(
@@ -5319,7 +5725,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Aggiorna display distanza e area
-        function updateRulerDisplay(previewKm = 0, showAreaMode = false) {
+         // [RULER] updateRulerDisplay
+       function updateRulerDisplay(previewKm = 0, showAreaMode = false) {
             const resultDiv = document.getElementById('rulerResult');
             const distanceSection = document.getElementById('rulerDistanceSection');
             const areaSection = document.getElementById('rulerAreaSection');
@@ -5365,7 +5772,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Mostra superficie di una zona esistente
-        function showZoneArea(zone) {
+         // [ZONES] showZoneArea
+       function showZoneArea(zone) {
             if (!zone || !zone.vertices || zone.vertices.length < 3) return;
 
             const resultDiv = document.getElementById('rulerResult');
@@ -5397,7 +5805,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Calcola centroide del poligono
-        function calculateCentroid(points) {
+         // [UTILS] calculateCentroid
+       function calculateCentroid(points) {
             let latSum = 0, lngSum = 0;
             points.forEach(p => {
                 latSum += p.lat;
@@ -5458,7 +5867,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Mostra dialog per salvare il campo di gara
-        function showSaveZoneDialog(centroid, locationName, perimeterNm) {
+         // [ZONES] showSaveZoneDialog
+       function showSaveZoneDialog(centroid, locationName, perimeterNm) {
             // Crea overlay
             const overlay = document.createElement('div');
             overlay.id = 'saveZoneOverlay';
@@ -5534,13 +5944,15 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Annulla salvataggio
-        function cancelSaveZone() {
+         // [ZONES] cancelSaveZone
+       function cancelSaveZone() {
             const overlay = document.getElementById('saveZoneOverlay');
             if (overlay) overlay.remove();
         }
 
         // Conferma salvataggio campo di gara
-        function confirmSaveZone(locationName, centerLat, centerLng, year) {
+         // [ZONES] confirmSaveZone
+       function confirmSaveZone(locationName, centerLat, centerLng, year) {
             const nameInput = document.getElementById('zoneNameInput');
             const name = nameInput.value.trim();
 
@@ -5604,7 +6016,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Rimuovi anteprima linea
-        function clearPreview() {
+         // [OTHER] clearPreview
+       function clearPreview() {
             if (previewLine) {
                 map.removeLayer(previewLine);
                 previewLine = null;
@@ -5616,7 +6029,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Verifica se il click è vicino al primo punto
-        function isNearFirstPoint(latlng) {
+         // [ZONES] isNearFirstPoint
+       function isNearFirstPoint(latlng) {
             if (rulerPoints.length < 3) return false;
             const firstPoint = rulerPoints[0];
             const firstPixel = map.latLngToContainerPoint(L.latLng(firstPoint.lat, firstPoint.lng));
@@ -5629,7 +6043,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Aggiungi punto al righello
-        function addRulerPoint(latlng) {
+         // [ZONES] addRulerPoint
+       function addRulerPoint(latlng) {
             // Verifica chiusura poligono
             if (isNearFirstPoint(latlng)) {
                 closePolygonAndSave();
@@ -5764,7 +6179,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Toggle righello attivo/disattivo
-        function toggleRuler() {
+         // [LAYERS] toggleRuler
+       function toggleRuler() {
             rulerActive = !rulerActive;
             const btn = document.getElementById('rulerToggleBtn');
 
@@ -5782,7 +6198,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Pulisci righello
-        function clearRuler() {
+         // [RULER] clearRuler
+       function clearRuler() {
             rulerMarkers.forEach(m => map.removeLayer(m));
             rulerMarkers = [];
             rulerLines.forEach(item => {
@@ -5808,7 +6225,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Aggiorna tutte le linee dopo drag
-        function updateAllLines() {
+         // [RULER] updateAllLines
+       function updateAllLines() {
             // Rimuovi linee e label esistenti
             rulerLines.forEach(item => {
                 map.removeLayer(item.line);
@@ -5856,7 +6274,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Toggle modalita editing
-        function toggleEditMode() {
+         // [LAYERS] toggleEditMode
+       function toggleEditMode() {
             editMode = !editMode;
             const btn = document.getElementById('rulerEditBtn');
 
@@ -5887,7 +6306,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Mostra pulsante modifica quando ci sono abbastanza punti
-        function showEditButton() {
+         // [ZONES] showEditButton
+       function showEditButton() {
             const btn = document.getElementById('rulerEditBtn');
             if (rulerPoints.length >= 2) {
                 btn.style.display = '';
@@ -5898,7 +6318,8 @@ Questa azione non puo essere annullata.`)) {
         let editingZoneId = null;
 
         // Carica una zona salvata per l'editing
-        function editSelectedZone() {
+         // [ZONES] editSelectedZone
+       function editSelectedZone() {
             const select = document.getElementById('zoneSelect');
             const zoneId = select.value;
 
@@ -6018,7 +6439,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Mostra pulsante per salvare le modifiche
-        function showSaveChangesButton(zoneName) {
+         // [UI] showSaveChangesButton
+       function showSaveChangesButton(zoneName) {
             // Rimuovi pulsante esistente se presente
             const existing = document.getElementById('saveChangesBtn');
             if (existing) existing.remove();
@@ -6039,7 +6461,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Salva le modifiche alla zona
-        function saveZoneChanges(zoneName) {
+         // [ZONES] saveZoneChanges
+       function saveZoneChanges(zoneName) {
             if (!editingZoneId || rulerPoints.length < 3) {
                 showToast('Errore', 'Nessuna zona in modifica', 'danger', 2000);
                 return;
@@ -6151,13 +6574,15 @@ Questa azione non puo essere annullata.`)) {
         // ============================================
 
         // Storage: Carica catture da localStorage
-        function getCatches() {
+         // [CATCH_LOG] getCatches
+       function getCatches() {
             const saved = localStorage.getItem('bathyExplorerCatches');
             return saved ? JSON.parse(saved) : [];
         }
 
         // Storage: Salva catture in localStorage
-        function saveCatchesToStorage() {
+         // [CATCH_LOG] saveCatchesToStorage
+       function saveCatchesToStorage() {
             localStorage.setItem('bathyExplorerCatches', JSON.stringify(catches));
         }
 
@@ -6165,6 +6590,8 @@ Questa azione non puo essere annullata.`)) {
         // WHATSAPP INTEGRATION FOR TOURNAMENT MODE
         // =============================================
 
+
+        // [STORAGE] loadWhatsAppSettings
         function loadWhatsAppSettings() {
             const number = localStorage.getItem('bathyExplorerWhatsAppNumber') || '';
             const enabled = localStorage.getItem('bathyExplorerWhatsAppEnabled') === 'true';
@@ -6174,12 +6601,16 @@ Questa azione non puo essere annullata.`)) {
             if (enabledCheck) enabledCheck.checked = enabled;
         }
 
+
+        // [STORAGE] saveWhatsAppNumber
         function saveWhatsAppNumber() {
             const number = document.getElementById('whatsappNumber').value.trim();
             localStorage.setItem('bathyExplorerWhatsAppNumber', number);
             showToast('Salvato', 'Numero WhatsApp salvato', 'success', 1500);
         }
 
+
+        // [STORAGE] saveWhatsAppSettings
         function saveWhatsAppSettings() {
             const enabled = document.getElementById('whatsappEnabled').checked;
             localStorage.setItem('bathyExplorerWhatsAppEnabled', enabled);
@@ -6195,6 +6626,8 @@ Questa azione non puo essere annullata.`)) {
             }
         }
 
+
+        // [STORAGE] testWhatsAppMessage
         function testWhatsAppMessage() {
             const number = document.getElementById('whatsappNumber').value.trim();
             if (!number) {
@@ -6206,6 +6639,8 @@ Questa azione non puo essere annullata.`)) {
             window.open('https://wa.me/' + cleanNumber + '?text=' + encodeURIComponent(msg), '_blank');
         }
 
+
+        // [CATCH_LOG] sendWhatsAppCatch
         function sendWhatsAppCatch(catchData, type) {
             const enabled = localStorage.getItem('bathyExplorerWhatsAppEnabled') === 'true';
             const number = localStorage.getItem('bathyExplorerWhatsAppNumber');
@@ -6226,7 +6661,8 @@ Questa azione non puo essere annullata.`)) {
         // =============================================
 
         // Inizializza Catch Log all'avvio
-        function initCatchLog() {
+         // [CATCH_LOG] initCatchLog
+       function initCatchLog() {
             catches = getCatches();
             populateSpeciesFilter();
             renderCatchList();
@@ -6235,7 +6671,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Popola dropdown specie (include custom, esclude opzione "Altra specie...")
-        function populateSpeciesFilter() {
+         // [CATCH_LOG] populateSpeciesFilter
+       function populateSpeciesFilter() {
             const select = document.getElementById('catchFilterSpecies');
             if (!select) return;
             select.innerHTML = '<option value="all">Tutte le specie</option>';
@@ -6247,7 +6684,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Toggle modalita registrazione
-        function toggleCatchMode() {
+         // [LAYERS] toggleCatchMode
+       function toggleCatchMode() {
             catchLogActive = !catchLogActive;
             const btn = document.getElementById('catchModeBtn');
             if (catchLogActive) {
@@ -6266,7 +6704,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Geolocation: Usa GPS corrente - SALVATAGGIO IMMEDIATO
-        function useCurrentGPS() {
+         // [WEATHER] useCurrentGPS
+       function useCurrentGPS() {
             if (!navigator.geolocation) {
                 showToast('GPS non disponibile', 'Il browser non supporta la geolocalizzazione', 'warning', 4000);
                 return;
@@ -6294,7 +6733,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // SALVATAGGIO RAPIDO - Solo coordinate e timestamp
-        function quickSaveCatch(lat, lng, source) {
+         // [CATCH_LOG] quickSaveCatch
+       function quickSaveCatch(lat, lng, source) {
             const catchData = {
                 id: 'catch_' + Date.now(),
                 type: null,           // Da compilare dopo
@@ -6329,7 +6769,8 @@ Questa azione non puo essere annullata.`)) {
         let pendingCatchPhoto = null;
 
         // MODIFICA CATTURA - Apre dialog per aggiungere/modificare dettagli
-        function editCatch(catchId) {
+         // [ZONES] editCatch
+       function editCatch(catchId) {
             const catchData = catches.find(c => c.id === catchId);
             if (!catchData) return;
 
@@ -6446,7 +6887,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Chiudi dialog
-        function closeCatchDialog() {
+         // [CATCH_LOG] closeCatchDialog
+       function closeCatchDialog() {
             const overlay = document.getElementById('catchDialogOverlay');
             if (overlay) overlay.remove();
             editingCatchId = null;
@@ -6454,7 +6896,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Seleziona tipo cattura
-        function selectCatchType(type) {
+         // [CATCH_LOG] selectCatchType
+       function selectCatchType(type) {
             document.querySelectorAll('.catch-type-btn').forEach(btn => {
                 btn.classList.remove('selected');
                 if (btn.dataset.type === type) {
@@ -6474,7 +6917,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Gestione selezione specie (mostra/nasconde input custom)
-        function handleSpeciesChange(value) {
+         // [CATCH_LOG] handleSpeciesChange
+       function handleSpeciesChange(value) {
             const customGroup = document.getElementById('customSpeciesGroup');
             if (customGroup) {
                 customGroup.style.display = value === '_custom_' ? 'block' : 'none';
@@ -6485,7 +6929,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Upload foto
-        function handlePhotoUpload(event) {
+         // [STORAGE] handlePhotoUpload
+       function handlePhotoUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -6499,7 +6944,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Salva modifiche cattura
-        function saveEditedCatch() {
+         // [ZONES] saveEditedCatch
+       function saveEditedCatch() {
             if (!editingCatchId) return;
 
             const catchIndex = catches.findIndex(c => c.id === editingCatchId);
@@ -6549,7 +6995,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Crea icona marker per cattura
-        function createCatchMarkerIcon(type) {
+         // [NAVIGATION] createCatchMarkerIcon
+       function createCatchMarkerIcon(type) {
             // Marker grigio per punti non ancora classificati
             if (!type) {
                 return L.divIcon({
@@ -6571,7 +7018,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Render marker sulla mappa
-        function renderCatchMarkers() {
+         // [NAVIGATION] renderCatchMarkers
+       function renderCatchMarkers() {
             // Rimuovi marker esistenti
             catchMarkers.forEach(m => map.removeLayer(m));
             catchMarkers = [];
@@ -6625,7 +7073,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Render lista catture nella sidebar
-        function renderCatchList() {
+         // [CATCH_LOG] renderCatchList
+       function renderCatchList() {
             const container = document.getElementById('catchListContainer');
             if (!container) return;
 
@@ -6683,7 +7132,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Vai a cattura sulla mappa
-        function goToCatch(catchId) {
+         // [NAVIGATION] goToCatch
+       function goToCatch(catchId) {
             const c = catches.find(x => x.id === catchId);
             if (c) {
                 map.setView([c.location.lat, c.location.lng], 14);
@@ -6697,7 +7147,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Elimina cattura
-        function deleteCatch(catchId) {
+         // [CATCH_LOG] deleteCatch
+       function deleteCatch(catchId) {
             if (!confirm('Eliminare questa cattura?')) return;
             catches = catches.filter(c => c.id !== catchId);
             saveCatchesToStorage();
@@ -6708,13 +7159,15 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Applica filtri
-        function applyCatchFilters() {
+         // [CATCH_LOG] applyCatchFilters
+       function applyCatchFilters() {
             renderCatchList();
             renderCatchMarkers();
         }
 
         // Aggiorna statistiche
-        function updateCatchStats() {
+         // [CATCH_LOG] updateCatchStats
+       function updateCatchStats() {
             const today = new Date().toDateString();
             const todayCount = catches.filter(c => new Date(c.timestamp).toDateString() === today).length;
             const totalCount = catches.length;
@@ -6726,7 +7179,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Export JSON
-        function exportCatchesJSON() {
+         // [CATCH_LOG] exportCatchesJSON
+       function exportCatchesJSON() {
             if (catches.length === 0) {
                 showToast('Nessun dato', 'Non ci sono catture da esportare', 'warning', 3000);
                 return;
@@ -6743,7 +7197,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Export CSV
-        function exportCatchesCSV() {
+         // [CATCH_LOG] exportCatchesCSV
+       function exportCatchesCSV() {
             if (catches.length === 0) {
                 showToast('Nessun dato', 'Non ci sono catture da esportare', 'warning', 3000);
                 return;
@@ -6785,7 +7240,8 @@ Questa azione non puo essere annullata.`)) {
         const PROXIMITY_THRESHOLD_NM = 0.5;    // Soglia allarme in miglia nautiche (0.5nm = ~926m)
 
         // Toggle modalita torneo
-        function toggleTournamentMode(enabled) {
+         // [LAYERS] toggleTournamentMode
+       function toggleTournamentMode(enabled) {
             if (enabled) {
                 showStartTournamentDialog();
             } else {
@@ -6798,7 +7254,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Mostra dialog avvio torneo
-        function showStartTournamentDialog() {
+         // [COMPETITION] showStartTournamentDialog
+       function showStartTournamentDialog() {
             // Trova zone disponibili
             const zones = typeof ZONES_DATA !== 'undefined' ? ZONES_DATA : [];
             const userZones = JSON.parse(localStorage.getItem('bathyExplorerUserZones') || '[]');
@@ -6845,10 +7302,14 @@ Questa azione non puo essere annullata.`)) {
             document.getElementById('tournamentNameInput').focus();
         }
 
+
+        // [COMPETITION] cancelStartTournament
         function cancelStartTournament() {
             document.getElementById('startTournamentOverlay')?.remove();
         }
 
+
+        // [COMPETITION] confirmStartTournament
         function confirmStartTournament() {
             const name = document.getElementById('tournamentNameInput').value.trim();
             if (!name) {
@@ -6903,6 +7364,8 @@ Questa azione non puo essere annullata.`)) {
             showToast('Gara Iniziata', `"${name}" - Buona fortuna!`, 'success', 3000);
         }
 
+
+        // [COMPETITION] deactivateTournamentMode
         function deactivateTournamentMode() {
             tournamentMode = false;
             activeTournament = null;
@@ -6931,6 +7394,8 @@ Questa azione non puo essere annullata.`)) {
             stopProximityMonitoring();
         }
 
+
+        // [COMPETITION] startTournamentTimer
         function startTournamentTimer() {
             if (tournamentTimerInterval) clearInterval(tournamentTimerInterval);
             tournamentTimerInterval = setInterval(() => {
@@ -6945,7 +7410,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Mostra zona torneo sulla mappa con bordo evidenziato
-        function displayTournamentZone(zone) {
+         // [ZONES] displayTournamentZone
+       function displayTournamentZone(zone) {
             // Rimuovi eventuale zona precedente
             if (tournamentZonePolygon) {
                 map.removeLayer(tournamentZonePolygon);
@@ -6996,7 +7462,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Avvia monitoraggio prossimita al limite zona
-        function startProximityMonitoring(zone) {
+         // [COMPETITION] startProximityMonitoring
+       function startProximityMonitoring(zone) {
             if (!zone || !zone.vertices || !navigator.geolocation) return;
 
             // Salva vertici zona per calcoli
@@ -7022,7 +7489,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Ferma monitoraggio prossimita
-        function stopProximityMonitoring() {
+         // [OTHER] stopProximityMonitoring
+       function stopProximityMonitoring() {
             if (proximityWatchId) {
                 navigator.geolocation.clearWatch(proximityWatchId);
                 proximityWatchId = null;
@@ -7032,7 +7500,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Controlla distanza dal bordo zona
-        function checkProximityToZoneBoundary(lat, lng) {
+         // [ZONES] checkProximityToZoneBoundary
+       function checkProximityToZoneBoundary(lat, lng) {
             if (!activeTournament || !activeTournament.zoneVertices) return;
 
             const vertices = activeTournament.zoneVertices;
@@ -7073,7 +7542,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Calcola distanza punto-segmento in km
-        function distanceToSegment(px, py, x1, y1, x2, y2) {
+         // [RULER] distanceToSegment
+       function distanceToSegment(px, py, x1, y1, x2, y2) {
             const A = px - x1;
             const B = py - y1;
             const C = x2 - x1;
@@ -7103,7 +7573,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Verifica se punto e dentro poligono (ray casting)
-        function isPointInPolygon(lat, lng, vertices) {
+         // [ZONES] isPointInPolygon
+       function isPointInPolygon(lat, lng, vertices) {
             let inside = false;
             for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
                 const xi = vertices[i].lat, yi = vertices[i].lng;
@@ -7118,7 +7589,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Mostra allarme prossimita visivo
-        function showProximityAlert(level, message, distance) {
+         // [UI] showProximityAlert
+       function showProximityAlert(level, message, distance) {
             let alertEl = document.getElementById('proximityAlert');
 
             if (!alertEl) {
@@ -7180,7 +7652,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Nascondi allarme prossimita
-        function hideProximityAlert() {
+         // [UI] hideProximityAlert
+       function hideProximityAlert() {
             const alertEl = document.getElementById('proximityAlert');
             if (alertEl) {
                 alertEl.style.display = 'none';
@@ -7189,7 +7662,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Aggiorna indicatore prossimita nel panel torneo
-        function updateProximityIndicator(status, text) {
+         // [UI] updateProximityIndicator
+       function updateProximityIndicator(status, text) {
             let indicator = document.getElementById('proximityIndicator');
             if (!indicator) return;
 
@@ -7210,7 +7684,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Registra strike rapido (solo posizione e ora)
-        function registerQuickStrike() {
+         // [UTILS] registerQuickStrike
+       function registerQuickStrike() {
             if (!activeTournament) return;
 
             // Effetto visivo pulsante
@@ -7238,6 +7713,8 @@ Questa azione non puo essere annullata.`)) {
             }
         }
 
+
+        // [COMPETITION] addTournamentStrike
         function addTournamentStrike(lat, lng) {
             const strike = {
                 id: 'strike_' + Date.now(),
@@ -7274,6 +7751,8 @@ Questa azione non puo essere annullata.`)) {
             sendWhatsAppCatch(strike, 'strike');
         }
 
+
+        // [COMPETITION] updateTournamentUI
         function updateTournamentUI() {
             if (!activeTournament) return;
 
@@ -7313,7 +7792,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Dialog per completare/convertire strike
-        function openStrikeDialog(catchId) {
+         // [CATCH_LOG] openStrikeDialog
+       function openStrikeDialog(catchId) {
             const catchData = activeTournament?.catches.find(c => c.id === catchId);
             if (!catchData) return;
 
@@ -7378,10 +7858,14 @@ Questa azione non puo essere annullata.`)) {
             document.body.insertAdjacentHTML('beforeend', dialogHTML);
         }
 
+
+        // [CATCH_LOG] closeStrikeDialog
         function closeStrikeDialog() {
             document.getElementById('strikeDialogOverlay')?.remove();
         }
 
+
+        // [UTILS] convertToRelease
         function convertToRelease(catchId) {
             const catchData = activeTournament?.catches.find(c => c.id === catchId);
             if (!catchData) return;
@@ -7431,7 +7915,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Termina torneo
-        function endTournament() {
+         // [COMPETITION] endTournament
+       function endTournament() {
             if (!activeTournament) {
                 deactivateTournamentMode();
                 return;
@@ -7486,6 +7971,8 @@ Questa azione non puo essere annullata.`)) {
             document.body.insertAdjacentHTML('beforeend', dialogHTML);
         }
 
+
+        // [COMPETITION] saveTournamentToCatches
         function saveTournamentToCatches() {
             if (!activeTournament) return;
 
@@ -7505,6 +7992,8 @@ Questa azione non puo essere annullata.`)) {
             deactivateTournamentMode();
         }
 
+
+        // [COMPETITION] exportAndCloseTournament
         function exportAndCloseTournament() {
             if (!activeTournament) return;
 
@@ -7545,6 +8034,8 @@ Questa azione non puo essere annullata.`)) {
             deactivateTournamentMode();
         }
 
+
+        // [COMPETITION] discardTournament
         function discardTournament() {
             if (!activeTournament) return;
 
@@ -7596,6 +8087,8 @@ Questa azione non puo essere annullata.`)) {
         // ============================================
         var crosshairTimeout = null;
 
+
+        // [OTHER] initCrosshair
         function initCrosshair() {
             const crosshair = document.getElementById('mapCrosshair');
             if (!crosshair) return;
@@ -7628,7 +8121,8 @@ Questa azione non puo essere annullata.`)) {
         var compassStartAngle = 0;
 
         // Inizializza la rosa dei venti con rotazione
-        function initCompassRose() {
+         // [OTHER] initCompassRose
+       function initCompassRose() {
             const compass = document.getElementById('compassRose');
             const mapContainer = document.getElementById('map');
 
@@ -7673,6 +8167,8 @@ Questa azione non puo essere annullata.`)) {
             }
         }
 
+
+        // [UTILS] requestCompassPermission
         function requestCompassPermission() {
             DeviceOrientationEvent.requestPermission()
                 .then(response => {
@@ -7685,6 +8181,8 @@ Questa azione non puo essere annullata.`)) {
                 .catch(console.error);
         }
 
+
+        // [OTHER] handleDeviceOrientation
         function handleDeviceOrientation(event) {
             // alpha = rotazione attorno all'asse z (bussola)
             if (event.alpha !== null && !compassDragging) {
@@ -7697,6 +8195,8 @@ Questa azione non puo essere annullata.`)) {
             }
         }
 
+
+        // [COMPETITION] startCompassDrag
         function startCompassDrag(e) {
             e.preventDefault();
             compassDragging = true;
@@ -7709,6 +8209,8 @@ Questa azione non puo essere annullata.`)) {
             compassStartAngle = Math.atan2(clientY - centerY, clientX - centerX) * 180 / Math.PI - mapRotation;
         }
 
+
+        // [OTHER] dragCompass
         function dragCompass(e) {
             if (!compassDragging) return;
             e.preventDefault();
@@ -7722,6 +8224,8 @@ Questa azione non puo essere annullata.`)) {
             setMapRotation(currentAngle - compassStartAngle);
         }
 
+
+        // [OTHER] endCompassDrag
         function endCompassDrag(e) {
             if (compassDragging) {
                 compassDragging = false;
@@ -7732,6 +8236,8 @@ Questa azione non puo essere annullata.`)) {
             }
         }
 
+
+        // [MAP] setMapRotation
         function setMapRotation(degrees) {
             mapRotation = degrees;
             // Ruota la rosa dei venti (indicatore)
@@ -7747,6 +8253,8 @@ Questa azione non puo essere annullata.`)) {
             }
         }
 
+
+        // [MAP] resetMapNorth
         function resetMapNorth() {
             mapRotation = 0;
             setMapRotation(0);
@@ -7759,13 +8267,16 @@ Questa azione non puo essere annullata.`)) {
         // ============================================
         // BOAT TRACKING - Auto-center quando esce dalla mappa
         // ============================================
-        function isBoatInView() {
+         // [UTILS] isBoatInView
+       function isBoatInView() {
             if (!gpsBoatMarker) return true;
             const boatLatLng = gpsBoatMarker.getLatLng();
             const bounds = map.getBounds();
             return bounds.contains(boatLatLng);
         }
 
+
+        // [OTHER] centerOnBoat
         function centerOnBoat() {
             if (!gpsBoatMarker) {
                 showToast('GPS non attivo', 'Attiva il tracking GPS per vedere la barca', 'warning', 2000);
@@ -7776,6 +8287,8 @@ Questa azione non puo essere annullata.`)) {
             showToast('Centrato', 'Mappa centrata sulla barca', 'info', 1000);
         }
 
+
+        // [UTILS] checkBoatVisibility
         function checkBoatVisibility() {
             if (!gpsTrackingActive || !gpsBoatMarker) return;
 
@@ -7786,7 +8299,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Carica rotte salvate da localStorage (o demo se vuoto)
-        function loadSavedRoutes() {
+         // [FAVORITES] loadSavedRoutes
+       function loadSavedRoutes() {
             const saved = localStorage.getItem('bathyExplorerRoutes');
             if (saved) {
                 gpsSavedRoutes = JSON.parse(saved);
@@ -7804,7 +8318,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Carica rotte demo - traversate da Forio
-        function loadDemoRoutes() {
+         // [GPS] loadDemoRoutes
+       function loadDemoRoutes() {
             // Se esistono già rotte, non sovrascrivere
             if (gpsSavedRoutes.length > 0) {
                 showToast('Rotte esistenti', 'Hai già delle rotte salvate. Cancellale per caricare le demo.', 'info', 3000);
@@ -7923,7 +8438,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Formatta durata in HH:MM:SS
-        function formatRouteDuration(ms) {
+         // [GPS] formatRouteDuration
+       function formatRouteDuration(ms) {
             const totalSeconds = Math.floor(ms / 1000);
             const hours = Math.floor(totalSeconds / 3600);
             const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -7935,12 +8451,14 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Salva rotte nel localStorage
-        function saveSavedRoutes() {
+         // [FAVORITES] saveSavedRoutes
+       function saveSavedRoutes() {
             localStorage.setItem('bathyExplorerRoutes', JSON.stringify(gpsSavedRoutes));
         }
 
         // Cambia colore traccia
-        function changeTrackColor(color) {
+         // [GPS] changeTrackColor
+       function changeTrackColor(color) {
             gpsTrackColor = color;
             // Aggiorna polyline attiva se esiste
             if (gpsTrackLine) {
@@ -7949,7 +8467,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Toggle sezione collapsible generica
-        function toggleSection(sectionId) {
+         // [LAYERS] toggleSection
+       function toggleSection(sectionId) {
             const section = document.getElementById(sectionId);
             if (section) {
                 section.classList.toggle('collapsed');
@@ -8368,6 +8887,20 @@ Questa azione non puo essere annullata.`)) {
                         <li><span style="color:#fde725">Giallo:</span> Alta produttivita (ottimo!)</li>
                     </ul>
 
+            <!-- Wind Legend -->
+            <div>
+                <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 6px;"><i class="fas fa-wind"></i> Vento (scala Beaufort)</div>
+                <div class="legend-grid">
+                    <div class="legend-item"><div class="legend-color" style="background: #3b82f6;"></div> Calmo 0-1kn</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #22c55e;"></div> Bava 1-3kn</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #84cc16;"></div> Brezza 4-6kn</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #eab308;"></div> Moderato 7-10kn</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #f97316;"></div> Teso 11-16kn</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #ef4444;"></div> Fresco 17-21kn</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #dc2626;"></div> Forte 22-27kn</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #991b1b;"></div> Burrasca 28+kn</div>
+                </div>
+            </div>
                     <div class="tip">
                         <div class="tip-title">Per la pesca</div>
                         Le zone di transizione (fronti) dove i colori cambiano bruscamente sono i migliori spot!
@@ -8627,6 +9160,8 @@ Questa azione non puo essere annullata.`)) {
             }
         };
 
+
+        // [UI] showHelp
         function showHelp(section) {
             const content = helpContent[section];
             if (!content) return;
@@ -8636,6 +9171,8 @@ Questa azione non puo essere annullata.`)) {
             document.getElementById('helpPopupOverlay').classList.add('show');
         }
 
+
+        // [UI] closeHelp
         function closeHelp() {
             document.getElementById('helpPopupOverlay').classList.remove('show');
         }
@@ -8648,7 +9185,8 @@ Questa azione non puo essere annullata.`)) {
         });
 
         // Toggle GPS Tracking on/off
-        function toggleGpsTracking(enabled) {
+         // [LAYERS] toggleGpsTracking
+       function toggleGpsTracking(enabled) {
             if (enabled) {
                 startGpsTracking();
             } else {
@@ -8657,7 +9195,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Avvia GPS Tracking
-        function startGpsTracking() {
+         // [COMPETITION] startGpsTracking
+       function startGpsTracking() {
             if (!navigator.geolocation) {
                 showToast('Non supportato', 'Il tuo browser non supporta la geolocalizzazione', 'danger', 3000);
                 document.getElementById('gpsTrackingSwitch').checked = false;
@@ -8703,7 +9242,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Stop GPS Tracking (senza cancellare dati)
-        function stopGpsTracking() {
+         // [GPS] stopGpsTracking
+       function stopGpsTracking() {
             if (gpsWatchId !== null) {
                 navigator.geolocation.clearWatch(gpsWatchId);
                 gpsWatchId = null;
@@ -8725,7 +9265,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Stop e cancella tutto
-        function stopAndClearTracking() {
+         // [GPS] stopAndClearTracking
+       function stopAndClearTracking() {
             if (!confirm('Vuoi cancellare il percorso corrente?\nI dati non salvati andranno persi.')) {
                 return;
             }
@@ -8754,7 +9295,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Pausa/Riprendi tracking
-        function togglePauseTracking() {
+         // [LAYERS] togglePauseTracking
+       function togglePauseTracking() {
             gpsTrackingPaused = !gpsTrackingPaused;
             updatePauseButton();
 
@@ -8766,7 +9308,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Aggiorna bottone pausa
-        function updatePauseButton() {
+         // [UI] updatePauseButton
+       function updatePauseButton() {
             const btn = document.getElementById('pauseTrackingBtn');
             if (gpsTrackingPaused) {
                 btn.innerHTML = '<i class="fas fa-play"></i> Riprendi';
@@ -8778,7 +9321,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Crea marker barca
-        function createBoatMarker() {
+         // [NAVIGATION] createBoatMarker
+       function createBoatMarker() {
             if (gpsBoatMarker) {
                 map.removeLayer(gpsBoatMarker);
             }
@@ -8836,7 +9380,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Callback posizione GPS
-        function onGpsPositionUpdate(position) {
+         // [UI] onGpsPositionUpdate
+       function onGpsPositionUpdate(position) {
             if (!gpsTrackingActive || gpsTrackingPaused) return;
 
             const lat = position.coords.latitude;
@@ -8896,7 +9441,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Calcola distanza in miglia nautiche
-        function calculateDistanceNm(lat1, lng1, lat2, lng2) {
+         // [RULER] calculateDistanceNm
+       function calculateDistanceNm(lat1, lng1, lat2, lng2) {
             const R = 3440.065; // Raggio terra in nm
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLng = (lng2 - lng1) * Math.PI / 180;
@@ -8908,7 +9454,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Aggiorna statistiche GPS nella UI
-        function updateGpsStats(lat, lng, speed, heading) {
+         // [WEATHER] updateGpsStats
+       function updateGpsStats(lat, lng, speed, heading) {
             // Velocità in nodi (1 m/s = 1.94384 kn)
             const speedKn = speed ? (speed * 1.94384).toFixed(1) : '0.0';
             document.getElementById('gpsSpeed').textContent = speedKn;
@@ -8937,7 +9484,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Errore GPS
-        function onGpsError(error) {
+         // [GPS] onGpsError
+       function onGpsError(error) {
             let msg = 'Errore GPS';
             switch(error.code) {
                 case error.PERMISSION_DENIED:
@@ -8955,7 +9503,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Mostra dialog salvataggio rotta
-        function showSaveRouteDialog() {
+         // [CATCH_LOG] showSaveRouteDialog
+       function showSaveRouteDialog() {
             if (gpsTrackPoints.length < 2) {
                 showToast('Nessun percorso', 'Registra almeno 2 punti prima di salvare', 'warning', 3000);
                 return;
@@ -9068,6 +9617,8 @@ Questa azione non puo essere annullata.`)) {
         // Conferma salvataggio rotta
         const MAX_SAVED_ROUTES = 10;
 
+
+        // [GPS] confirmSaveRoute
         function confirmSaveRoute() {
             const name = document.getElementById('routeNameInput').value.trim();
             if (!name) {
@@ -9105,7 +9656,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Render lista rotte salvate
-        function renderRouteList() {
+         // [UI] renderRouteList
+       function renderRouteList() {
             const container = document.getElementById('routeList');
             const countEl = document.getElementById('routeCount');
 
@@ -9158,6 +9710,8 @@ Questa azione non puo essere annullata.`)) {
         // Mostra/nascondi rotte sulla mappa (supporta multiple)
         var displayedRouteLines = {};  // { routeId: L.polyline }
 
+
+        // [LAYERS] toggleRouteOnMap
         function toggleRouteOnMap(routeId) {
             const route = gpsSavedRoutes.find(r => r.id === routeId);
             if (!route) return;
@@ -9243,7 +9797,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Centra la mappa su tutte le rotte visibili
-        function fitMapToVisibleRoutes() {
+         // [MAP] fitMapToVisibleRoutes
+       function fitMapToVisibleRoutes() {
             const visibleIds = Object.keys(displayedRouteLines);
             if (visibleIds.length === 0) return;
 
@@ -9255,12 +9810,14 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Compatibilità con vecchio codice
-        function showRouteOnMap(routeId) {
+         // [UI] showRouteOnMap
+       function showRouteOnMap(routeId) {
             toggleRouteOnMap(routeId);
         }
 
         // Mostra tutte le rotte sulla mappa
-        function showAllRoutes() {
+         // [UI] showAllRoutes
+       function showAllRoutes() {
             if (gpsSavedRoutes.length === 0) {
                 showToast('Nessuna rotta', 'Non ci sono rotte salvate da visualizzare', 'info', 2000);
                 return;
@@ -9323,7 +9880,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Nascondi tutte le rotte dalla mappa
-        function hideAllRoutes() {
+         // [UI] hideAllRoutes
+       function hideAllRoutes() {
             const count = Object.keys(displayedRouteLines).length;
             if (count === 0) {
                 showToast('Nessuna rotta', 'Non ci sono rotte visualizzate da nascondere', 'info', 2000);
@@ -9344,7 +9902,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Elimina rotta
-        function deleteRoute(routeId) {
+         // [GPS] deleteRoute
+       function deleteRoute(routeId) {
             const route = gpsSavedRoutes.find(r => r.id === routeId);
             if (!route) return;
 
@@ -9364,7 +9923,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Export singola rotta GPX
-        function exportSingleRouteGPX(routeId) {
+         // [GPS] exportSingleRouteGPX
+       function exportSingleRouteGPX(routeId) {
             const route = gpsSavedRoutes.find(r => r.id === routeId);
             if (!route) return;
 
@@ -9374,7 +9934,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Export tutte le rotte GPX
-        function exportAllRoutesGPX() {
+         // [GPS] exportAllRoutesGPX
+       function exportAllRoutesGPX() {
             if (gpsSavedRoutes.length === 0) {
                 showToast('Nessuna rotta', 'Non ci sono rotte da esportare', 'warning', 2000);
                 return;
@@ -9386,7 +9947,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Export tutte le rotte GeoJSON
-        function exportAllRoutesGeoJSON() {
+         // [GPS] exportAllRoutesGeoJSON
+       function exportAllRoutesGeoJSON() {
             if (gpsSavedRoutes.length === 0) {
                 showToast('Nessuna rotta', 'Non ci sono rotte da esportare', 'warning', 2000);
                 return;
@@ -9398,7 +9960,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Genera GPX con supporto colore (estensione gpx_style)
-        function generateGPX(routes) {
+         // [OTHER] generateGPX
+       function generateGPX(routes) {
             let gpx = `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="BathymetryExplorer"
      xmlns="http://www.topografix.com/GPX/1/1"
@@ -9449,7 +10012,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Genera GeoJSON con colore e stile
-        function generateGeoJSON(routes) {
+         // [OTHER] generateGeoJSON
+       function generateGeoJSON(routes) {
             return {
                 type: 'FeatureCollection',
                 features: routes.map(route => ({
@@ -9474,7 +10038,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Download file helper
-        function downloadFile(content, filename, mimeType) {
+         // [STORAGE] downloadFile
+       function downloadFile(content, filename, mimeType) {
             const blob = new Blob([content], { type: mimeType });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -9493,6 +10058,8 @@ Questa azione non puo essere annullata.`)) {
         var demoNavigationActive = false;
         var demoIntervalId = null;
 
+
+        // [COMPETITION] startDemoNavigation
         function startDemoNavigation() {
             // Se demo gia' attiva, fermala
             if (demoNavigationActive) {
@@ -9639,7 +10206,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Ferma demo navigation
-        function stopDemoNavigation() {
+         // [OTHER] stopDemoNavigation
+       function stopDemoNavigation() {
             if (demoIntervalId) {
                 clearInterval(demoIntervalId);
                 demoIntervalId = null;
@@ -9655,7 +10223,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Calcola bearing tra due punti (gradi)
-        function calculateBearing(lat1, lng1, lat2, lng2) {
+         // [UTILS] calculateBearing
+       function calculateBearing(lat1, lng1, lat2, lng2) {
             const dLng = (lng2 - lng1) * Math.PI / 180;
             const lat1Rad = lat1 * Math.PI / 180;
             const lat2Rad = lat2 * Math.PI / 180;
@@ -9670,7 +10239,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Inizializza GPS Tracking
-        function initGpsTracking() {
+         // [GPS] initGpsTracking
+       function initGpsTracking() {
             loadSavedRoutes();
         }
 
@@ -9710,7 +10280,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Aggiorna progresso download offline
-        function updateOfflineProgress(downloaded, total) {
+         // [RULER] updateOfflineProgress
+       function updateOfflineProgress(downloaded, total) {
             const percent = Math.round((downloaded / total) * 100);
             const progressEl = document.getElementById('offlineProgress');
             if (progressEl) {
@@ -9721,7 +10292,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Download offline completato
-        function offlineDownloadComplete(downloaded, total) {
+         // [RULER] offlineDownloadComplete
+       function offlineDownloadComplete(downloaded, total) {
             showToast('Download Completato',
                 `${downloaded} tile salvate per uso offline`, 'success', 3000);
             const btn = document.getElementById('downloadOfflineBtn');
@@ -9838,7 +10410,8 @@ Questa azione non puo essere annullata.`)) {
         // =============================================
 
         // Popola dropdown zone per download offline
-        function populateOfflineZones() {
+         // [ZONES] populateOfflineZones
+       function populateOfflineZones() {
             const select = document.getElementById('offlineZoneSelect');
             if (!select) return;
 
@@ -9867,7 +10440,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Gestisci selezione zona per offline
-        function onOfflineZoneSelected(zoneId) {
+         // [ZONES] onOfflineZoneSelected
+       function onOfflineZoneSelected(zoneId) {
             const infoPanel = document.getElementById('offlineAreaInfo');
             const detailsEl = document.getElementById('offlineAreaDetails');
             const downloadBtn = document.getElementById('downloadOfflineBtn');
@@ -9908,7 +10482,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Calcola bounds dal porto al campo gara + 10nm buffer
-        function calculateZoneDownloadBounds(zone) {
+         // [ZONES] calculateZoneDownloadBounds
+       function calculateZoneDownloadBounds(zone) {
             const bufferNm = 10;  // 10 miglia nautiche
             const bufferDeg = bufferNm / 60;  // 1 nm = 1 arcmin = 1/60 grado
 
@@ -9942,7 +10517,8 @@ Questa azione non puo essere annullata.`)) {
         }
 
         // Stima numero tile da scaricare
-        function estimateTileCount(bounds, maxZoom) {
+         // [LAYERS] estimateTileCount
+       function estimateTileCount(bounds, maxZoom) {
             let total = 0;
             for (let z = 8; z <= maxZoom; z++) {
                 const n = Math.pow(2, z);
@@ -10021,7 +10597,8 @@ Questa azione non puo essere annullata.`)) {
 
     <!-- Google Translate -->
     <script type="text/javascript">
-        function googleTranslateElementInit() {
+         // [OTHER] googleTranslateElementInit
+       function googleTranslateElementInit() {
             new google.translate.TranslateElement({
                 pageLanguage: 'it',
                 includedLanguages: 'it,en,zh-CN,ja,ru,pt,es,fr,de,hi',
@@ -10029,7 +10606,9 @@ Questa azione non puo essere annullata.`)) {
                 autoDisplay: false
             }, 'google_translate_element');
         }
-        
+         
+        // [OTHER] changeLanguage
+       
         function changeLanguage(lang) {
             // Trova il frame di Google Translate
             var googleFrame = document.querySelector('.goog-te-menu-frame');
