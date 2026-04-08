@@ -3897,6 +3897,19 @@
             className: 'route-line'
         }).bindPopup('<b>Rotta Alternativa</b><br>Marina \u2192 La 26<br>~26 Mn, rotta NW<br>Alternativa se Corner/Furuno non producono').addTo(fishingSpots);
 
+        // Passa click rotte al righello se attivo
+        [routeCornerFuruno, routeLa26].forEach(route => {
+            route.on('click', function(e) {
+                if (rulerActive) {
+                    L.DomEvent.stopPropagation(e);
+                    addRulerPoint(e.latlng);
+                } else if (catchLogActive) {
+                    L.DomEvent.stopPropagation(e);
+                    quickSaveCatch(e.latlng.lat, e.latlng.lng, 'manual');
+                }
+            });
+        });
+
         // --- CERCHIO LIMITE 50 MIGLIA NAUTICHE OWC ---
         // 50 NM = 92.600 metri
         const owcLimitCircle = L.circle([9.4275, -84.1628], {
@@ -3906,6 +3919,18 @@
             dashArray: '12, 8',
             interactive: true
         }).bindPopup('<b>Limite 50 Miglia Nautiche OWC</b><br>Raggio dal Marina Pez Vela<br>Tutta la pesca deve avvenire entro questo cerchio<br><b>Penalita\' fuori limite:</b> squalifica catture').addTo(fishingSpots);
+
+        // Passa click del cerchio 50NM al righello/catchLog se attivi
+        owcLimitCircle.on('click', function(e) {
+            if (rulerActive) {
+                L.DomEvent.stopPropagation(e);
+                addRulerPoint(e.latlng);
+            } else if (catchLogActive) {
+                L.DomEvent.stopPropagation(e);
+                quickSaveCatch(e.latlng.lat, e.latlng.lng, 'manual');
+                showToast('Punto segnato!', 'Clicca nella lista per completare i dati', 'info', 3000);
+            }
+        });
 
         // Toggle per mostrare/nascondere tutti i punti pesca OWC
         setupLayerToggle('layerFishingSpots', fishingSpots);
@@ -4410,9 +4435,12 @@ Questa azione non puo essere annullata.`)) {
                 ${zone.description ? '<small>' + zone.description + '</small>' : '<small>Clicca sui vertici per le coordinate</small>'}
             `);
 
-            // Passa click alla mappa se catchLogActive
+            // Passa click alla mappa se righello o catchLog attivi
             zonePolygon.on('click', function(e) {
-                if (catchLogActive) {
+                if (rulerActive) {
+                    L.DomEvent.stopPropagation(e);
+                    addRulerPoint(e.latlng);
+                } else if (catchLogActive) {
                     L.DomEvent.stopPropagation(e);
                     quickSaveCatch(e.latlng.lat, e.latlng.lng, 'manual');
                     showToast('Punto segnato!', 'Clicca nella lista per completare i dati', 'info', 3000);
