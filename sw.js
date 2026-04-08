@@ -3,7 +3,7 @@
  * Gestisce caching offline per mappe batimetriche
  */
 
-const CACHE_VERSION = 'v2.3.5';
+const CACHE_VERSION = 'v2.4.0';
 const CACHE_NAME = `bathyexplorer-${CACHE_VERSION}`;
 const TILES_CACHE = `bathyexplorer-tiles-${CACHE_VERSION}`;
 
@@ -13,7 +13,8 @@ const APP_SHELL = [
     './index.html',
     './zones_data.js',
     './manifest.json',
-    './isobaths_1000_2000.geojson'
+    './isobaths_1000_2000.geojson',
+    './guide.html'
 ];
 
 // Domini delle tile da cachare

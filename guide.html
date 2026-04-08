@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guida Utente - FISHINGTOOLS Bathymetry Explorer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.7;
+        }
+
+        /* Header */
+        .guide-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0c4a6e 100%);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .guide-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #7dd3fc;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .guide-header .logo i { font-size: 1.5rem; }
+
+        .back-btn {
+            margin-left: auto;
+            background: rgba(255,255,255,0.1);
+            color: #7dd3fc;
+            border: 1px solid rgba(125,211,252,0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(125,211,252,0.2);
+            color: #fff;
+        }
+
+        /* Main content */
+        .guide-container {
+            max-width: 900px;
+            margin: 80px auto 40px;
+            padding: 0 20px;
+        }
+
+        .guide-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .guide-title h1 {
+            font-size: 2rem;
+            color: #7dd3fc;
+            margin-bottom: 8px;
+        }
+
+        .guide-title p {
+            color: #94a3b8;
+            font-size: 1rem;
+        }
+
+        /* Table of Contents */
+        .toc {
+            background: rgba(30, 58, 95, 0.5);
+            border: 1px solid rgba(125, 211, 252, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 40px;
+        }
+
+        .toc h2 {
+            color: #7dd3fc;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 8px;
+        }
+
+        .toc a {
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .toc a:hover {
+            background: rgba(125, 211, 252, 0.1);
+            color: #7dd3fc;
+        }
+
+        .toc a i { width: 20px; text-align: center; color: #7dd3fc; font-size: 0.85rem; }
+
+        /* Sections */
+        .guide-section {
+            background: rgba(30, 58, 95, 0.3);
+            border: 1px solid rgba(125, 211, 252, 0.1);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .guide-section h2 {
+            color: #7dd3fc;
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(125, 211, 252, 0.15);
+        }
+
+        .guide-section h2 i { font-size: 1.1rem; }
+
+        .guide-section h3 {
+            color: #e2e8f0;
+            font-size: 1rem;
+            margin: 20px 0 8px;
+        }
+
+        .guide-section p {
+            color: #cbd5e1;
+            margin-bottom: 12px;
+        }
+
+        .guide-section ul, .guide-section ol {
+            color: #cbd5e1;
+            margin: 8px 0 16px 20px;
+        }
+
+        .guide-section li { margin-bottom: 6px; }
+
+        .tip {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 3px solid #22c55e;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+
+        .tip::before {
+            content: "Suggerimento: ";
+            color: #22c55e;
+            font-weight: 700;
+        }
+
+        .warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 3px solid #f59e0b;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+
+        .warning::before {
+            content: "Nota: ";
+            color: #f59e0b;
+            font-weight: 700;
+        }
+
+        kbd {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: monospace;
+            font-size: 0.85em;
+        }
+
+        .shortcut-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+
+        .shortcut-table th,
+        .shortcut-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(125, 211, 252, 0.1);
+        }
+
+        .shortcut-table th {
+            color: #7dd3fc;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .shortcut-table td { font-size: 0.9rem; }
+
+        /* Footer */
+        .guide-footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #64748b;
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(125, 211, 252, 0.1);
+            margin-top: 40px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .guide-container { padding: 0 12px; margin-top: 70px; }
+            .guide-title h1 { font-size: 1.5rem; }
+            .guide-section { padding: 20px 16px; }
+            .toc-grid { grid-template-columns: 1fr; }
+            .guide-header .logo span { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="guide-header">
+    <a href="index.html" class="logo">
+        <i class="fas fa-water"></i>
+        <span>FISHINGTOOLS Bathymetry Explorer</span>
+    </a>
+    <a href="index.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Torna alla Mappa
+    </a>
+</header>
+
+<div class="guide-container">
+
+    <div class="guide-title">
+        <h1><i class="fas fa-book"></i> Guida Utente</h1>
+        <p>Guida completa all'uso di FISHINGTOOLS Bathymetry Explorer</p>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="toc">
+        <h2><i class="fas fa-list"></i> Indice</h2>
+        <div class="toc-grid">
+            <a href="#overview"><i class="fas fa-info-circle"></i> Panoramica Generale</a>
+            <a href="#search"><i class="fas fa-search"></i> Cerca Posizione</a>
+            <a href="#favorites"><i class="fas fa-star"></i> Luoghi Interessanti</a>
+            <a href="#tournaments"><i class="fas fa-trophy"></i> Gare</a>
+            <a href="#offline"><i class="fas fa-download"></i> Modalita Offline</a>
+            <a href="#zones"><i class="fas fa-draw-polygon"></i> Campi di Gara</a>
+            <a href="#gps"><i class="fas fa-location-arrow"></i> GPS Tracking</a>
+            <a href="#catchlog"><i class="fas fa-fish"></i> Catch Log</a>
+            <a href="#ruler"><i class="fas fa-ruler"></i> Righello</a>
+            <a href="#fishing"><i class="fas fa-anchor"></i> Layer Pesca Sportiva</a>
+            <a href="#bathymetry"><i class="fas fa-water"></i> Batimetria</a>
+            <a href="#baselayers"><i class="fas fa-layer-group"></i> Layer Base</a>
+            <a href="#display"><i class="fas fa-sliders-h"></i> Controlli Display</a>
+            <a href="#legend"><i class="fas fa-palette"></i> Legende</a>
+            <a href="#position"><i class="fas fa-crosshairs"></i> Posizione Corrente</a>
+            <a href="#settings"><i class="fas fa-cog"></i> Impostazioni</a>
+            <a href="#shortcuts"><i class="fas fa-keyboard"></i> Scorciatoie</a>
+            <a href="#mobile"><i class="fas fa-mobile-alt"></i> Uso su Mobile</a>
+        </div>
+    </div>
+
+    <!-- 1. Overview -->
+    <div class="guide-section" id="overview">
+        <h2><i class="fas fa-info-circle"></i> Panoramica Generale</h2>
+        <p>
+            <strong>FISHINGTOOLS Bathymetry Explorer</strong> e un'applicazione web (PWA) per la visualizzazione
+            di mappe batimetriche marine, progettata per pescatori d'altura e sportivi.
+            L'app mostra la profondita del fondale marino, le isobate, i punti di pesca e le zone di gara
+            per tornei come l'Offshore World Championship (OWC) 2026 a Quepos, Costa Rica.
+        </p>
+        <h3>Funzionalita principali</h3>
+        <ul>
+            <li><strong>Mappe batimetriche</strong> multi-sorgente (EMODnet, GEBCO, NOAA, PacIOOS)</li>
+            <li><strong>Isobate</strong> a 1000m e 2000m di profondita</li>
+            <li><strong>17 punti di pesca</strong> nell'area OWC Quepos con descrizioni dettagliate</li>
+            <li><strong>Campi di gara</strong> per tornei italiani e OWC 2026</li>
+            <li><strong>GPS Tracking</strong> per tracciare la rotta in tempo reale</li>
+            <li><strong>Catch Log</strong> per registrare le catture con specie, peso e foto</li>
+            <li><strong>Righello</strong> per misurare distanze in miglia nautiche</li>
+            <li><strong>Modalita offline</strong> (PWA) per usare le mappe senza connessione</li>
+            <li><strong>Multilingua</strong> con traduzione automatica in 10 lingue</li>
+        </ul>
+        <div class="tip">
+            Installa l'app come PWA sul telefono per un'esperienza nativa: apri il menu del browser
+            e seleziona "Aggiungi alla schermata Home".
+        </div>
+    </div>
+
+    <!-- 2. Search -->
+    <div class="guide-section" id="search">
+        <h2><i class="fas fa-search"></i> Cerca Posizione</h2>
+        <p>
+            Permette di cercare qualsiasi localita nel mondo e centrare la mappa su di essa.
+        </p>
+        <h3>Come usare</h3>
+        <ol>
+            <li>Apri la sezione <strong>"Cerca Posizione"</strong> nella barra laterale (aperta per default)</li>
+            <li>Digita il nome di un luogo, coordinate o indirizzo</li>
+            <li>Premi <kbd>Invio</kbd> o clicca il pulsante di ricerca</li>
+            <li>La mappa si centrera sulla posizione trovata</li>
+        </ol>
+        <div class="tip">
+            Puoi cercare anche coordinate dirette, ad esempio: <code>9.4275, -84.1628</code> per andare
+            direttamente a Marina Pez Vela, Quepos.
+        </div>
+    </div>
+
+    <!-- 3. Favorites -->
+    <div class="guide-section" id="favorites">
+        <h2><i class="fas fa-star"></i> Luoghi Interessanti</h2>
+        <p>
+            Salva i tuoi luoghi preferiti per accedervi rapidamente. I preferiti sono salvati nel browser
+            e persistono tra le sessioni.
+        </p>
+        <h3>Come aggiungere un preferito</h3>
+        <ol>
+            <li>Naviga sulla mappa fino alla posizione desiderata</li>
+            <li>Apri la sezione <strong>"Luoghi Interessanti"</strong></li>
+            <li>Clicca <strong>"Aggiungi posizione corrente"</strong></li>
+            <li>Assegna un nome al preferito</li>
+        </ol>
+        <h3>Come navigare a un preferito</h3>
+        <p>Clicca sul nome del preferito nella lista e la mappa si centrera automaticamente.</p>
+        <div class="tip">
+            I preferiti vengono salvati nel localStorage del browser. Se cambi browser o cancelli
+            i dati, i preferiti andranno persi.
+        </div>
+    </div>
+
+    <!-- 4. Tournaments -->
+    <div class="guide-section" id="tournaments">
+        <h2><i class="fas fa-trophy"></i> Gare</h2>
+        <p>
+            Mostra informazioni sui tornei di pesca configurati nell'app, con link rapidi per centrare
+            la mappa sulla zona di gara.
+        </p>
+        <h3>Tornei disponibili</h3>
+        <ul>
+            <li><strong>Big Game Forio 2026</strong> - Ischia, Italia (raggio 15NM)</li>
+            <li><strong>Drifting Cup Procida 2026</strong> - Procida, Italia (raggio 5NM)</li>
+            <li><strong>Capri Trolling Championship 2026</strong> - Capri, Italia (raggio 5NM)</li>
+            <li><strong>Offshore World Championship 2026</strong> - Quepos, Costa Rica (raggio 50NM)</li>
+            <li><strong>Bisbee's Costa Rica Offshore 2026</strong> - Quepos, Costa Rica (raggio 50NM)</li>
+        </ul>
+        <p>
+            Cliccando su un torneo, la mappa si centra sull'area di gara e il campo viene evidenziato.
+        </p>
+    </div>
+
+    <!-- 5. Offline -->
+    <div class="guide-section" id="offline">
+        <h2><i class="fas fa-download"></i> Modalita Offline</h2>
+        <p>
+            L'app funziona come PWA (Progressive Web App) e puo essere usata offline dopo il primo caricamento.
+            Le tile della mappa vengono salvate nella cache del Service Worker.
+        </p>
+        <h3>Come funziona</h3>
+        <ul>
+            <li>Le tile che visiti vengono automaticamente salvate in cache</li>
+            <li>La prossima volta che apri la stessa area offline, le tile vengono servite dalla cache</li>
+            <li>Puoi scaricare tile per un'area specifica per uso offline</li>
+            <li>L'interfaccia dell'app (HTML, JS) e sempre disponibile offline</li>
+        </ul>
+        <h3>Gestione cache</h3>
+        <p>
+            Nella sezione Offline puoi vedere la dimensione della cache e svuotarla se necessario.
+        </p>
+        <div class="warning">
+            La cache delle tile puo occupare molto spazio. Svuotala periodicamente se il dispositivo
+            ha poco storage.
+        </div>
+    </div>
+
+    <!-- 6. Zones -->
+    <div class="guide-section" id="zones">
+        <h2><i class="fas fa-draw-polygon"></i> Campi di Gara</h2>
+        <p>
+            Visualizza i campi di gara dei tornei sulla mappa. Ogni campo e rappresentato da un poligono
+            (zone italiane) o un cerchio (zone OWC/Bisbee's a Quepos) con il punto di raduno evidenziato.
+        </p>
+        <h3>Informazioni mostrate</h3>
+        <ul>
+            <li><strong>Area del campo</strong> - poligono colorato o cerchio con raggio in miglia nautiche</li>
+            <li><strong>Punto di raduno</strong> - marker con le coordinate del punto di partenza</li>
+            <li><strong>Etichetta</strong> - nome del torneo con anno</li>
+        </ul>
+        <h3>Come attivare/disattivare</h3>
+        <p>
+            Ogni campo ha un checkbox nella sezione "Campi di Gara". Attiva o disattiva i singoli
+            campi per mostrare/nascondere le zone sulla mappa.
+        </p>
+        <div class="tip">
+            I campi di gara OWC e Bisbee's condividono lo stesso centro (Marina Pez Vela)
+            e lo stesso raggio di 50 miglia nautiche.
+        </div>
+    </div>
+
+    <!-- 7. GPS -->
+    <div class="guide-section" id="gps">
+        <h2><i class="fas fa-location-arrow"></i> GPS Tracking</h2>
+        <p>
+            Traccia la tua posizione in tempo reale sulla mappa. Utile durante la navigazione per vedere
+            il percorso fatto e la posizione corrente.
+        </p>
+        <h3>Come usare</h3>
+        <ol>
+            <li>Apri la sezione <strong>"GPS Tracking"</strong></li>
+            <li>Clicca <strong>"Avvia Tracking"</strong></li>
+            <li>Consenti al browser l'accesso alla posizione GPS</li>
+            <li>La tua posizione viene mostrata come un punto blu sulla mappa</li>
+            <li>Il percorso viene tracciato come una linea continua</li>
+        </ol>
+        <h3>Funzionalita</h3>
+        <ul>
+            <li><strong>Posizione in tempo reale</strong> con accuratezza indicata</li>
+            <li><strong>Traccia del percorso</strong> visualizzata sulla mappa</li>
+            <li><strong>Distanza percorsa</strong> calcolata automaticamente</li>
+            <li><strong>Velocita attuale</strong> in nodi</li>
+            <li><strong>Esportazione GPX</strong> del percorso registrato</li>
+        </ul>
+        <div class="warning">
+            Il GPS Tracking richiede il permesso di geolocalizzazione del browser.
+            Su iOS, funziona meglio se l'app e installata come PWA sulla schermata Home.
+        </div>
+    </div>
+
+    <!-- 8. Catch Log -->
+    <div class="guide-section" id="catchlog">
+        <h2><i class="fas fa-fish"></i> Catch Log</h2>
+        <p>
+            Registra le tue catture con tutti i dettagli: specie, peso, foto, posizione GPS e note.
+            I dati vengono salvati localmente nel browser.
+        </p>
+        <h3>Come registrare una cattura</h3>
+        <ol>
+            <li>Apri la sezione <strong>"Catch Log"</strong></li>
+            <li>Clicca <strong>"Nuova Cattura"</strong></li>
+            <li>Seleziona la specie dall'elenco (27 specie disponibili + opzione personalizzata)</li>
+            <li>Compila peso, lunghezza e note</li>
+            <li>Aggiungi una foto (opzionale)</li>
+            <li>La posizione GPS viene registrata automaticamente se il tracking e attivo</li>
+            <li>Salva la cattura</li>
+        </ol>
+        <h3>Specie disponibili</h3>
+        <p>L'elenco include specie dell'area OWC Quepos (Costa Rica) e del Mediterraneo:</p>
+        <ul>
+            <li><strong>Billfish (Release):</strong> Blue Marlin, Black Marlin, Striped Marlin, Sailfish</li>
+            <li><strong>Pelagici Quepos:</strong> Yellowfin Tuna, Dorado, Wahoo, Roosterfish</li>
+            <li><strong>Inshore Quepos:</strong> Snapper, Cubera Snapper, Grouper, Jack Crevalle, Amberjack, Pacific Snook, Tripletail</li>
+            <li><strong>Mediterraneo:</strong> Tonno Rosso, Pesce Spada, Aguglia Imperiale, Lampuga, Ricciola, Alalunga, Dentice, Orata, Cernia, Leccia Amia, Barracuda, Totano</li>
+        </ul>
+        <div class="tip">
+            Seleziona "Altra specie..." in fondo alla lista per inserire manualmente una specie non in elenco.
+        </div>
+    </div>
+
+    <!-- 9. Ruler -->
+    <div class="guide-section" id="ruler">
+        <h2><i class="fas fa-ruler"></i> Righello</h2>
+        <p>
+            Misura distanze sulla mappa in miglia nautiche (NM), chilometri o miglia terrestri.
+        </p>
+        <h3>Come usare</h3>
+        <ol>
+            <li>Apri la sezione <strong>"Righello"</strong></li>
+            <li>Clicca <strong>"Attiva Righello"</strong></li>
+            <li>Clicca sulla mappa per posizionare il punto di partenza</li>
+            <li>Clicca su un secondo punto per misurare la distanza</li>
+            <li>Puoi aggiungere piu punti per misurare un percorso</li>
+        </ol>
+        <div class="tip">
+            La distanza viene mostrata in tempo reale mentre muovi il mouse.
+            L'unita predefinita e la miglia nautica (1 NM = 1.852 km).
+        </div>
+    </div>
+
+    <!-- 10. Fishing Layer -->
+    <div class="guide-section" id="fishing">
+        <h2><i class="fas fa-anchor"></i> Layer Pesca Sportiva</h2>
+        <p>
+            Contiene i punti di interesse per la pesca nell'area OWC 2026 Quepos, le rotte consigliate
+            e il cerchio di limite delle 50 miglia nautiche.
+        </p>
+        <h3>Contenuto del layer</h3>
+        <ul>
+            <li><strong>17 punti di pesca</strong> con marker colorati, emoji e descrizioni dettagliate</li>
+            <li><strong>2 rotte</strong>: Marina &rarr; The Corner &rarr; The Furuno Bank (arancione) e Marina &rarr; La 26 (blu)</li>
+            <li><strong>Cerchio 50NM</strong>: limite del campo di gara OWC (cerchio rosso tratteggiato)</li>
+        </ul>
+        <h3>Toggle ON/OFF</h3>
+        <p>
+            Usa il checkbox <strong>"Punti di Pesca OWC"</strong> per mostrare/nascondere tutti gli elementi
+            del layer in una volta sola.
+        </p>
+
+        <h3>Nascondere singoli spot</h3>
+        <p>
+            Ogni punto di pesca ha un pulsante rosso <strong>"Nascondi"</strong> nella parte superiore
+            del popup. Cliccandolo, lo spot viene nascosto dalla mappa.
+        </p>
+
+        <h3>Riattivare spot nascosti</h3>
+        <ol>
+            <li>Apri la sezione <strong>"Layer Pesca Sportiva"</strong> nella barra laterale</li>
+            <li>Sotto il checkbox, appare il contatore: <em>"X spot nascosti"</em></li>
+            <li>Clicca il pulsante arancione <strong>"Mostra tutti"</strong></li>
+            <li>Tutti gli spot torneranno visibili</li>
+        </ol>
+        <div class="warning">
+            Gli spot nascosti vengono ricordati anche dopo aver chiuso il browser (salvati in localStorage).
+            Usa "Mostra tutti" per resettare.
+        </div>
+    </div>
+
+    <!-- 11. Bathymetry -->
+    <div class="guide-section" id="bathymetry">
+        <h2><i class="fas fa-water"></i> Batimetria</h2>
+        <p>
+            La sezione piu importante dell'app: mostra la profondita del fondale marino con diverse sorgenti dati.
+        </p>
+        <h3>Layer batimetrici disponibili</h3>
+        <ul>
+            <li><strong>EMODnet Bathymetry</strong> - Dati batimetrici europei ad alta risoluzione.
+                Copertura: Mari Europei (Mediterraneo, Atlantico NE, Baltico, Mare del Nord)</li>
+            <li><strong>GEBCO Grid</strong> - Dati batimetrici globali (General Bathymetric Chart of the Oceans).
+                Copertura: tutto il mondo, risoluzione ~450m</li>
+            <li><strong>NOAA ETOPO</strong> - Topografia/batimetria globale NOAA.
+                Copertura: tutto il mondo</li>
+            <li><strong>PacIOOS Bathymetry</strong> - Dati ad alta risoluzione per Pacifico e acque costiere.
+                Copertura: Oceano Pacifico</li>
+        </ul>
+        <h3>Isobate</h3>
+        <p>
+            Le <strong>isobate</strong> sono linee che collegano punti con la stessa profondita. L'app mostra:
+        </p>
+        <ul>
+            <li><strong>Isobata 1000m</strong> - linea blu chiaro, indica il margine della piattaforma continentale</li>
+            <li><strong>Isobata 2000m</strong> - linea blu scuro, indica la zona abissale</li>
+        </ul>
+        <div class="tip">
+            Per la pesca d'altura, le zone lungo le isobate 1000-2000m sono le piu produttive:
+            le correnti di risalita lungo il drop-off concentrano il plancton e attraggono pesci pelagici.
+        </div>
+    </div>
+
+    <!-- 12. Base Layers -->
+    <div class="guide-section" id="baselayers">
+        <h2><i class="fas fa-layer-group"></i> Layer Base</h2>
+        <p>
+            Scegli la mappa di sfondo tra diverse opzioni:
+        </p>
+        <ul>
+            <li><strong>OpenStreetMap</strong> - Mappa stradale standard</li>
+            <li><strong>Satellite</strong> - Immagini satellitari (Esri World Imagery)</li>
+            <li><strong>Nautica</strong> - Carta nautica OpenSeaMap con rotte e segnali marittimi</li>
+            <li><strong>Scuro</strong> - Tema scuro per uso notturno o in barca</li>
+        </ul>
+        <div class="tip">
+            Il layer "Scuro" e ideale per la navigazione notturna: riduce l'abbagliamento
+            e risparmia batteria sugli schermi OLED.
+        </div>
+    </div>
+
+    <!-- 13. Display Controls -->
+    <div class="guide-section" id="display">
+        <h2><i class="fas fa-sliders-h"></i> Controlli Display</h2>
+        <p>
+            Regola l'opacita dei layer batimetrici e altri parametri visivi della mappa.
+        </p>
+        <ul>
+            <li><strong>Slider opacita</strong> - Regola la trasparenza dei layer batimetrici sovrapposti
+                alla mappa base (0% = trasparente, 100% = opaco)</li>
+        </ul>
+    </div>
+
+    <!-- 14. Legend -->
+    <div class="guide-section" id="legend">
+        <h2><i class="fas fa-palette"></i> Legende</h2>
+        <p>
+            Mostra le legende dei colori per i layer batimetrici attivi. Ogni sorgente dati usa una scala
+            colori diversa per rappresentare la profondita:
+        </p>
+        <ul>
+            <li>Colori chiari (azzurro) = acque basse (0-200m)</li>
+            <li>Colori medi (blu) = piattaforma continentale (200-1000m)</li>
+            <li>Colori scuri (blu notte/viola) = acque profonde (1000-5000m+)</li>
+        </ul>
+    </div>
+
+    <!-- 15. Position -->
+    <div class="guide-section" id="position">
+        <h2><i class="fas fa-crosshairs"></i> Posizione Corrente</h2>
+        <p>
+            Mostra in tempo reale le coordinate del cursore (desktop) o del centro mappa (mobile):
+        </p>
+        <ul>
+            <li><strong>Latitudine e Longitudine</strong> in formato decimale</li>
+            <li><strong>Livello di zoom</strong> corrente</li>
+        </ul>
+        <div class="tip">
+            Su mobile, le coordinate si aggiornano quando muovi la mappa. Su desktop, seguono il cursore del mouse.
+        </div>
+    </div>
+
+    <!-- 16. Settings -->
+    <div class="guide-section" id="settings">
+        <h2><i class="fas fa-cog"></i> Impostazioni</h2>
+        <p>
+            Configura le preferenze dell'applicazione:
+        </p>
+        <ul>
+            <li><strong>Unita di misura</strong> - Miglia nautiche (NM), Chilometri (km) o Miglia terrestri (mi)</li>
+            <li><strong>Formato coordinate</strong> - Decimale (DD) o Gradi-Minuti-Secondi (DMS)</li>
+            <li><strong>Auto-zoom su GPS</strong> - Se attivo, la mappa segue automaticamente la tua posizione</li>
+        </ul>
+    </div>
+
+    <!-- 17. Shortcuts -->
+    <div class="guide-section" id="shortcuts">
+        <h2><i class="fas fa-keyboard"></i> Scorciatoie e Gesti</h2>
+        <h3>Desktop</h3>
+        <table class="shortcut-table">
+            <tr><th>Azione</th><th>Gesto</th></tr>
+            <tr><td>Zoom avanti/indietro</td><td>Rotella del mouse o <kbd>+</kbd> / <kbd>-</kbd></td></tr>
+            <tr><td>Spostare la mappa</td><td>Clicca e trascina</td></tr>
+            <tr><td>Mostra coordinate</td><td>Muovi il mouse sulla mappa</td></tr>
+            <tr><td>Info punto</td><td>Clicca su un marker</td></tr>
+        </table>
+
+        <h3>Mobile / Touchscreen</h3>
+        <table class="shortcut-table">
+            <tr><th>Azione</th><th>Gesto</th></tr>
+            <tr><td>Zoom avanti/indietro</td><td>Pinch (due dita)</td></tr>
+            <tr><td>Spostare la mappa</td><td>Trascina con un dito</td></tr>
+            <tr><td>Info punto</td><td>Tocca un marker</td></tr>
+            <tr><td>Chiudi popup</td><td>Tocca fuori dal popup</td></tr>
+        </table>
+    </div>
+
+    <!-- 18. Mobile -->
+    <div class="guide-section" id="mobile">
+        <h2><i class="fas fa-mobile-alt"></i> Uso su Mobile</h2>
+        <p>
+            L'app e completamente responsive e ottimizzata per l'uso su smartphone e tablet.
+        </p>
+        <h3>Barra laterale</h3>
+        <p>
+            Su mobile, la barra laterale occupa l'intera larghezza. Tocca il pulsante hamburger
+            (<i class="fas fa-bars"></i>) in alto a sinistra per aprirla/chiuderla.
+        </p>
+        <h3>Installazione PWA</h3>
+        <ol>
+            <li>Apri l'app nel browser del telefono</li>
+            <li><strong>iOS (Safari):</strong> Tocca l'icona Condividi (<i class="fas fa-share-square"></i>) &rarr; "Aggiungi alla schermata Home"</li>
+            <li><strong>Android (Chrome):</strong> Tocca il menu (<i class="fas fa-ellipsis-v"></i>) &rarr; "Installa app" o "Aggiungi a schermata Home"</li>
+            <li>L'app apparira come icona sulla schermata Home</li>
+        </ol>
+        <div class="tip">
+            Installando come PWA, l'app si apre a schermo intero senza la barra del browser,
+            offrendo piu spazio per la mappa. Inoltre funziona offline con le tile gia scaricate.
+        </div>
+    </div>
+
+    <div class="guide-footer">
+        <p>FISHINGTOOLS Bathymetry Explorer &mdash; Guida Utente v1.0</p>
+        <p style="margin-top:4px;">
+            <a href="https://github.com/Marinovinc/BathymetryExplorer" style="color:#7dd3fc;text-decoration:none;">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>
