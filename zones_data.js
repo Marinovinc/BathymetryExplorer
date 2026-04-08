@@ -97,32 +97,17 @@ const ZONES_DATA = [
         year: 2026,
         description: '50-mile radius from Marina Pez Vela - Apr 19-23, 2026',
         gatheringPoint: {
-            lat: 9.4264,
-            lng: -84.1728,
+            lat: 9.4275,
+            lng: -84.1628,
             name: 'Marina Pez Vela'
         },
-        vertices: [
-            // Semicerchio 50nm SOLO OCEANO - evita Penisola Nicoya
-            // Marina Pez Vela come punto di partenza sulla costa
-            { lat: 9.4264, lng: -84.1728 },  // Marina (sulla costa)
-            { lat: 9.10, lng: -84.30 },      // Sud lungo costa
-            { lat: 8.80, lng: -84.60 },      // SSW - verso oceano
-            { lat: 8.60, lng: -85.00 },      // S - nel Pacifico
-            { lat: 8.60, lng: -85.40 },      // SW - profondo oceano
-            { lat: 9.00, lng: -85.70 },      // W - punto più ovest
-            { lat: 9.4264, lng: -85.80 },    // W centro - ~50nm dalla marina
-            { lat: 9.90, lng: -85.70 },      // NW - risale
-            { lat: 10.20, lng: -85.40 },     // NW - nel Pacifico aperto
-            { lat: 10.30, lng: -85.10 },     // N - oceano (ovest di Nicoya)
-            { lat: 10.05, lng: -84.90 },     // NE - oceano (punta Nicoya)
-            { lat: 9.70, lng: -84.70 }       // E - Golfo Nicoya (acqua)
-        ],
+        vertices: [],
         color: '#0ea5e9',
         centerMeta: {
-            lat: 9.4264,
-            lng: -84.1728,
+            lat: 9.4275,
+            lng: -84.1628,
             radiusNm: 50,
-            type: 'semicircle_west',
+            type: 'circle',
             unit: 'nm'
         }
     },
@@ -133,31 +118,17 @@ const ZONES_DATA = [
         year: 2026,
         description: 'World richest fishing tournament - Apr 14-18, 2026',
         gatheringPoint: {
-            lat: 9.4264,
-            lng: -84.1728,
+            lat: 9.4275,
+            lng: -84.1628,
             name: 'Marina Pez Vela'
         },
-        vertices: [
-            // Semicerchio 50nm SOLO OCEANO - evita Penisola Nicoya
-            { lat: 9.4264, lng: -84.1728 },  // Marina (sulla costa)
-            { lat: 9.10, lng: -84.30 },      // Sud lungo costa
-            { lat: 8.80, lng: -84.60 },      // SSW - verso oceano
-            { lat: 8.60, lng: -85.00 },      // S - nel Pacifico
-            { lat: 8.60, lng: -85.40 },      // SW - profondo oceano
-            { lat: 9.00, lng: -85.70 },      // W - punto più ovest
-            { lat: 9.4264, lng: -85.80 },    // W centro - ~50nm dalla marina
-            { lat: 9.90, lng: -85.70 },      // NW - risale
-            { lat: 10.20, lng: -85.40 },     // NW - nel Pacifico aperto
-            { lat: 10.30, lng: -85.10 },     // N - oceano (ovest di Nicoya)
-            { lat: 10.05, lng: -84.90 },     // NE - oceano (punta Nicoya)
-            { lat: 9.70, lng: -84.70 }       // E - Golfo Nicoya (acqua)
-        ],
+        vertices: [],
         color: '#ef4444',
         centerMeta: {
-            lat: 9.4264,
-            lng: -84.1728,
+            lat: 9.4275,
+            lng: -84.1628,
             radiusNm: 50,
-            type: 'semicircle_west',
+            type: 'circle',
             unit: 'nm'
         }
     }

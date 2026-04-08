@@ -4313,21 +4313,34 @@ Questa azione non puo essere annullata.`)) {
             // Remove existing zone
             clearTournamentZone();
 
-            // Draw polygon
-            const latlngs = zone.vertices.map(v => [v.lat, v.lng]);
-            zonePolygon = L.polygon(latlngs, {
-                color: zone.color,
-                weight: 3,
-                opacity: 0.8,
-                fillColor: zone.color,
-                fillOpacity: 0,
-                dashArray: '10, 5'
-            }).addTo(map);
+            // Draw zone: circle if centerMeta.type=circle and no vertices, polygon otherwise
+            if (zone.centerMeta && zone.centerMeta.type === 'circle' && (!zone.vertices || zone.vertices.length === 0)) {
+                const radiusMeters = zone.centerMeta.radiusNm * 1852;
+                zonePolygon = L.circle([zone.centerMeta.lat, zone.centerMeta.lng], {
+                    radius: radiusMeters,
+                    color: zone.color,
+                    weight: 3,
+                    opacity: 0.8,
+                    fillColor: zone.color,
+                    fillOpacity: 0.05,
+                    dashArray: '10, 5'
+                }).addTo(map);
+            } else {
+                const latlngs = zone.vertices.map(v => [v.lat, v.lng]);
+                zonePolygon = L.polygon(latlngs, {
+                    color: zone.color,
+                    weight: 3,
+                    opacity: 0.8,
+                    fillColor: zone.color,
+                    fillOpacity: 0,
+                    dashArray: '10, 5'
+                }).addTo(map);
+            }
 
             zonePolygon.bindPopup(`
                 <strong><i class="fas fa-trophy"></i> ${zone.name}</strong><br>
                 <em>${zone.tournament} ${zone.year}</em><br>
-                <small>Clicca sui vertici per le coordinate</small>
+                ${zone.description ? '<small>' + zone.description + '</small>' : '<small>Clicca sui vertici per le coordinate</small>'}
             `);
 
             // Passa click alla mappa se catchLogActive
