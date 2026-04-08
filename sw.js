@@ -3,7 +3,7 @@
  * Gestisce caching offline per mappe batimetriche
  */
 
-const CACHE_VERSION = 'v2.2.0';
+const CACHE_VERSION = 'v2.2.1';
 const CACHE_NAME = `bathyexplorer-${CACHE_VERSION}`;
 const TILES_CACHE = `bathyexplorer-tiles-${CACHE_VERSION}`;
 
