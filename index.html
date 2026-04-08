@@ -2297,6 +2297,17 @@
                     <div class="layer-desc">Animazione particelle stile Windy</div>
                 </label>
             </div>
+            <hr style="border:0;border-top:1px solid rgba(255,255,255,0.15);margin:8px 0;">
+            <div class="layer-item" data-coverage="quepos">
+                <input type="checkbox" id="layerFishingSpots" checked>
+                <label for="layerFishingSpots">
+                    <div class="layer-title">
+                        <i class="fas fa-map-marker-alt" style="margin-right:4px;"></i> Punti di Pesca OWC
+                        <span class="coverage-badge quepos" style="background:#e65100;">Quepos</span>
+                    </div>
+                    <div class="layer-desc">Spot, rotte e limite 50NM (OWC 2026)</div>
+                </label>
+            </div>
             </div><!-- /section-content -->
         </div>
 
@@ -3680,69 +3691,89 @@
         });
 
         const spots = [
+            // --- PARTENZA ---
+            {
+                lat: 9.4275, lng: -84.1628,
+                name: 'Marina Pez Vela (Partenza OWC)',
+                fill: '#00c853', icon: fishIcon('#00c853', '🚤'),
+                desc: '<b>Marina Pez Vela</b> - Punto di partenza OWC 2026<br>Quepos, Costa Rica<br><b>Lines In:</b> 06:30 | <b>Lines Out:</b> 15:30<br><b>Rientro obbligatorio:</b> 17:00<br><b>Limite:</b> 50 miglia nautiche dalla marina<br><b>VHF:</b> Canale 18 (partenza/arrivo)'
+            },
             // --- OFFSHORE: Sailfish & Marlin (20-45 miglia) ---
             {
                 lat: 9.20, lng: -84.55,
                 name: 'Continental Shelf Drop-off',
                 fill: '#1565c0', icon: fishIcon('#1565c0', '🐟'),
-                desc: '<b>Continental Shelf Drop-off</b><br>~25 miglia da Marina Pez Vela<br>Profondita\': da 200ft a 1.000-2.000ft<br><b>Specie:</b> Sailfish, Blue Marlin, Striped Marlin<br><b>Stagione:</b> Gen-Apr (peak), tutto l\'anno<br><b>Tecnica:</b> Trolling con ballyhoo e teaser'
+                desc: '<b>Continental Shelf Drop-off</b><br>~25 miglia da Marina Pez Vela<br>Profondita\': da 200ft a 1.000-2.000ft<br><b>Specie:</b> Sailfish (200 pts OWC), Blue Marlin (500 pts), Striped Marlin (500 pts)<br><b>Stagione:</b> Gen-Apr (peak), tutto l\'anno<br><b>Tecnica:</b> Trolling con ballyhoo e teaser<br><b>OWC:</b> Piano B - se Corner/Furuno non producono, cerca il drop-off a 200ft'
             },
             {
                 lat: 9.35, lng: -84.60,
-                name: '"The 26" - Spot Marlin',
+                name: 'La 26 - Spot Marlin',
                 fill: '#0d47a1', icon: fishIcon('#0d47a1', '🏆'),
-                desc: '<b>"The 26"</b><br>~26 miglia offshore NW di Quepos<br>Spot leggendario per marlin e wahoo<br><b>Specie:</b> Blue Marlin, Wahoo, Yellowfin Tuna<br><b>Tecnica:</b> Speed trolling per wahoo, slow trolling live bait per marlin'
+                desc: '<b>La 26</b> - ~26 miglia offshore NW<br>Spot leggendario per marlin e wahoo<br><b>Specie:</b> Blue Marlin (500 pts), Wahoo, Yellowfin Tuna (1 pt/lb)<br><b>Tecnica:</b> Speed trolling per wahoo, slow trolling live bait per marlin<br><b>OWC Piano A:</b> Rotta mattutina alternativa al Corner. Trollare lungo la 26 cercando temperature break 82-84\u00b0F'
             },
             {
                 lat: 9.1417, lng: -84.4417,
                 name: 'THE CORNER - Hotspot #1 OWC',
                 fill: '#d50000', icon: fishIcon('#d50000', '🔥'),
-                desc: '<b>THE CORNER</b> (Il punto piu\' caldo)<br>9\u00b008\'.5 N | 84\u00b026\'.5 W<br>~22-24 Mn dalla Marina (rotta 210\u00b0-220\u00b0)<br>Caduta brusca da 400 a 2.000 piedi<br><b>Specie:</b> Marlin, grandi Sailfish<br><b>Note:</b> Punto chiave OWC 2026'
+                desc: '<b>THE CORNER</b> (Il punto piu\' caldo)<br>9\u00b008\'.5 N | 84\u00b026\'.5 W<br>~22-24 Mn dalla Marina (rotta 210\u00b0-220\u00b0)<br>Caduta brusca da 400 a 2.000 piedi<br><b>Specie:</b> Marlin (500 pts), grandi Sailfish (200 pts)<br><b>OWC Piano A:</b> Primo spot da raggiungere. Arrivare entro 07:30, trollare il bordo del canyon. Cerca uccelli e bait ball. Se marlin hookup, vale 500 pts!'
             },
             {
                 lat: 9.125, lng: -84.4167,
                 name: 'THE FURUNO BANK',
                 fill: '#ff6d00', icon: fishIcon('#ff6d00', '🏆'),
-                desc: '<b>THE FURUNO BANK</b><br>Area: 9\u00b005\'N - 9\u00b010\'N | 84\u00b020\'W - 84\u00b030\'W<br>~20 Mn dalla Marina<br>Risalita di foraggio, garanzia di attivita\'<br><b>Specie:</b> Sailfish, Blue Marlin, Black Marlin<br><b>Note:</b> Punto chiave OWC 2026'
+                desc: '<b>THE FURUNO BANK</b><br>Area: 9\u00b005\'N - 9\u00b010\'N | 84\u00b020\'W - 84\u00b030\'W<br>~20 Mn dalla Marina<br>Risalita di foraggio, garanzia di attivita\'<br><b>Specie:</b> Sailfish (200 pts), Blue Marlin (500 pts), Black Marlin (500 pts)<br><b>OWC Piano A:</b> Dopo il Corner, spostarsi qui. Risalita sottomarina concentra baitfish. Spinner dolphins = indicatore tuna/billfish sotto'
             },
             {
                 lat: 9.00, lng: -84.90,
                 name: 'FAD Zone - Marlin Concentrati',
                 fill: '#6a1b9a', icon: fishIcon('#6a1b9a', '🎯'),
-                desc: '<b>FAD Zone (Fish Aggregating Devices)</b><br>~45-60 miglia offshore<br>Boe ancorate che concentrano pelagici<br><b>Specie:</b> Blue Marlin, Black Marlin, Yellowfin Tuna, Dorado<br><b>Stagione:</b> Mag-Ott (Blue Marlin peak), tutto l\'anno<br><b>Note:</b> Trip overnight, partenza ore 15:00'
+                desc: '<b>FAD Zone (Fish Aggregating Devices)</b><br>~45-60 miglia offshore<br>Boe ancorate che concentrano pelagici<br><b>Specie:</b> Blue Marlin (500 pts), Black Marlin (500 pts), Yellowfin Tuna (1 pt/lb), Dorado (1 pt/lb)<br><b>Stagione:</b> Mag-Ott (Blue Marlin peak)<br><b>OWC:</b> \u26a0\ufe0f Verifica distanza! Max 50NM dalla marina. Molti FAD sono FUORI dal limite OWC'
             },
             {
                 lat: 8.80, lng: -85.20,
                 name: 'Seamount Domain - Big Game',
                 fill: '#4a148c', icon: fishIcon('#4a148c', '🗻'),
-                desc: '<b>Seamount Domain</b><br>~80-100 miglia offshore<br>Montagne sottomarine con rilievo >1 km dal fondo<br>Include Fisher Seamount e Quepos Plateau<br><b>Specie:</b> Blue Marlin trophy, Black Marlin, Yellowfin Tuna giganti<br><b>Note:</b> Trip multi-day, solo barche grandi'
+                desc: '<b>Seamount Domain</b><br>~80-100 miglia offshore<br>Montagne sottomarine con rilievo >1 km dal fondo<br>Include Fisher Seamount e Quepos Plateau<br><b>Specie:</b> Blue Marlin trophy, Black Marlin, Yellowfin Tuna giganti<br><b>\u26a0\ufe0f OWC:</b> FUORI LIMITE! Oltre le 50 miglia nautiche dalla marina. Non raggiungibile durante il torneo'
+            },
+            // --- ZONE STRATEGICHE OWC ---
+            {
+                lat: 9.28, lng: -84.50,
+                name: 'Temperature Break Zone',
+                fill: '#ff6f00', icon: fishIcon('#ff6f00', '🌡️'),
+                desc: '<b>Temperature Break Zone</b><br>Zona dove si incontrano masse d\'acqua diverse<br>Cercare transizione 82-84\u00b0F con SST layer<br><b>Specie:</b> Sailfish (200 pts), Marlin (500 pts), Dorado (1 pt/lb)<br><b>OWC Piano B:</b> Se Corner e Furuno non producono, cerca il temperature break. Attiva layer SST e segui la linea di colore. I billfish cacciano lungo questa linea'
+            },
+            {
+                lat: 9.22, lng: -84.40,
+                name: 'Spinner Dolphin / Tuna Zone',
+                fill: '#0097a7', icon: fishIcon('#0097a7', '🐬'),
+                desc: '<b>Spinner Dolphin / Tuna Zone</b><br>Dove i delfini spinner si aggregano<br><b>Specie:</b> Yellowfin Tuna (1 pt/lb OWC), Dorado (1 pt/lb), Sailfish<br><b>OWC Piano C:</b> Se billfish non mordono, passa alla strategia peso. Tuna 50+ lbs = 50+ punti. Cerca branchi di spinner dolphins = tuna sotto. Usa live bait o cedar plugs'
             },
             // --- NEARSHORE: Sailfish vicini (15-20 miglia) ---
             {
                 lat: 9.38, lng: -84.38,
                 name: 'Punta Quepos Ledge',
                 fill: '#e65100', icon: fishIcon('#e65100', '⚡'),
-                desc: '<b>Punta Quepos Ledge</b><br>~8-12 miglia offshore<br>Dove l\'acqua inizia a cadere in profondita\'<br><b>Specie:</b> Mahi-Mahi, Yellowfin Tuna, Sailfish (stagionale)<br><b>Tecnica:</b> Trolling e live bait'
+                desc: '<b>Punta Quepos Ledge</b><br>~8-12 miglia offshore<br>Dove l\'acqua inizia a cadere in profondita\'<br><b>Specie:</b> Mahi-Mahi (1 pt/lb), Yellowfin Tuna (1 pt/lb), Sailfish (200 pts)<br><b>Tecnica:</b> Trolling e live bait<br><b>OWC:</b> Spot di riserva - vicino alla marina, utile se il tempo stringe per rientrare entro le 17:00'
             },
             {
                 lat: 9.30, lng: -84.45,
                 name: 'Sailfish Grounds (20 miglia)',
                 fill: '#1565c0', icon: fishIcon('#1565c0', '⛵'),
-                desc: '<b>Sailfish Grounds</b><br>~20 miglia da Marina Pez Vela<br>Zona classica per sailfish, il piu\' vicino<br><b>Specie:</b> Sailfish (80-100 lbs media), Dorado<br><b>Stagione:</b> Dic-Apr (peak), double-digit releases<br><b>Tecnica:</b> Slow trolling ballyhoo + plastic teasers'
+                desc: '<b>Sailfish Grounds</b><br>~20 miglia da Marina Pez Vela<br>Zona classica per sailfish, il piu\' vicino<br><b>Specie:</b> Sailfish (200 pts OWC), Dorado (1 pt/lb)<br><b>Stagione:</b> Dic-Apr (peak), double-digit releases<br><b>Tecnica:</b> Slow trolling ballyhoo + plastic teasers<br><b>OWC:</b> 1 sailfish = 200 pts. Con 5 release in un giorno = 1.000 pts! Strategia volume'
             },
             // --- SUD: Isla del Cano ---
             {
                 lat: 8.72, lng: -83.88,
                 name: 'Isla del Cano - Offshore Billfish',
                 fill: '#00695c', icon: fishIcon('#00695c', '🏝️'),
-                desc: '<b>Isla del Cano</b><br>~60 miglia SE di Quepos<br>Acque profonde ricche di pelagici<br><b>Specie:</b> Sailfish, Marlin, Yellowfin Tuna, Dorado<br><b>Note:</b> Riserva biologica, pesca solo nelle acque circostanti<br>Partenza da Uvita o Drake Bay piu\' vicina'
+                desc: '<b>Isla del Cano</b><br>~60 miglia SE di Quepos<br>Acque profonde ricche di pelagici<br><b>Specie:</b> Sailfish, Marlin, Yellowfin Tuna, Dorado<br><b>\u26a0\ufe0f OWC:</b> FUORI LIMITE! Oltre le 50 miglia nautiche dalla marina<br><b>Note:</b> Riserva biologica, pesca solo nelle acque circostanti'
             },
             // --- INSHORE: Roosterfish & strutture costiere ---
             {
                 lat: 9.39, lng: -84.17,
-                name: 'Canyon Reef',
+                name: 'Reef di Quepos (Black Marlin)',
                 fill: '#2e7d32', icon: fishIcon('#2e7d32', '🪸'),
-                desc: '<b>Canyon Reef</b><br>Reef vicino alla costa di Quepos<br><b>Specie:</b> Snapper, Grouper, Roosterfish<br><b>Tecnica:</b> Bottom fishing, live bait'
+                desc: '<b>Reef di Quepos</b><br>Reef vicino alla costa<br><b>Specie:</b> Snapper, Grouper, Roosterfish, Black Marlin (500 pts!)<br><b>Tecnica:</b> Bottom fishing, live bait<br><b>OWC:</b> Black Marlin occasionali sui reef vicini! Vale 500 pts. Trollare live bonito lungo il bordo del reef'
             },
             {
                 lat: 9.38, lng: -84.15,
@@ -3776,6 +3807,41 @@
                 .bindPopup(spot.desc, { maxWidth: 300 })
                 .addTo(fishingSpots);
         });
+
+        // --- ROTTE NAVIGAZIONE OWC ---
+        // Rotta 1: Marina → Corner → Furuno Bank (rotta principale Piano A)
+        const routeCornerFuruno = L.polyline([
+            [9.4275, -84.1628],  // Marina Pez Vela
+            [9.1417, -84.4417],  // The Corner
+            [9.125, -84.4167]    // Furuno Bank
+        ], {
+            color: '#ff6d00', weight: 3, opacity: 0.8,
+            dashArray: '10, 8',
+            className: 'route-line'
+        }).bindPopup('<b>Rotta Piano A</b><br>Marina \u2192 Corner \u2192 Furuno Bank<br>~22-24 Mn, rotta 210\u00b0-220\u00b0<br>Partenza 06:00, Lines In 06:30<br>Arrivo Corner ~07:30').addTo(fishingSpots);
+
+        // Rotta 2: Marina → La 26 (rotta alternativa)
+        const routeLa26 = L.polyline([
+            [9.4275, -84.1628],  // Marina Pez Vela
+            [9.35, -84.60]       // La 26
+        ], {
+            color: '#2196f3', weight: 3, opacity: 0.8,
+            dashArray: '10, 8',
+            className: 'route-line'
+        }).bindPopup('<b>Rotta Alternativa</b><br>Marina \u2192 La 26<br>~26 Mn, rotta NW<br>Alternativa se Corner/Furuno non producono').addTo(fishingSpots);
+
+        // --- CERCHIO LIMITE 50 MIGLIA NAUTICHE OWC ---
+        // 50 NM = 92.600 metri
+        const owcLimitCircle = L.circle([9.4275, -84.1628], {
+            radius: 92600,
+            color: '#f44336', weight: 2, opacity: 0.6,
+            fillColor: '#f44336', fillOpacity: 0.03,
+            dashArray: '12, 8',
+            interactive: true
+        }).bindPopup('<b>Limite 50 Miglia Nautiche OWC</b><br>Raggio dal Marina Pez Vela<br>Tutta la pesca deve avvenire entro questo cerchio<br><b>Penalita\' fuori limite:</b> squalifica catture').addTo(fishingSpots);
+
+        // Toggle per mostrare/nascondere tutti i punti pesca OWC
+        setupLayerToggle('layerFishingSpots', fishingSpots);
 
         // Contours layer (GEBCO) is controlled via layerContours checkbox
 
