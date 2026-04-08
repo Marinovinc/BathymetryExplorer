@@ -1741,7 +1741,7 @@
             <div class="search-group">
                 <label>Nome luogo</label>
                 <div class="search-input-wrapper">
-                    <input type="text" id="searchInput" placeholder="es. Ischia, Italia">
+                    <input type="text" id="searchInput" placeholder="es. Quepos, Costa Rica">
                     <button class="search-btn" onclick="searchLocation()">
                         <i class="fas fa-search"></i>
                     </button>
@@ -2375,15 +2375,25 @@
                     <div class="layer-desc">Nomi e annotazioni oceaniche</div>
                 </label>
             </div>
-            <div class="layer-item" data-coverage="europe">
-                <input type="checkbox" id="layerContours">
+            <div class="layer-item" data-coverage="global">
+                <input type="checkbox" id="layerContours" checked>
                 <label for="layerContours">
                     <div class="layer-title">
                         Isobate (linee profondità)
-                        <a href="https://emodnet.ec.europa.eu/en/bathymetry" target="_blank" class="info-link" title="Info EMODnet"><i class="fas fa-info-circle"></i></a>
-                        <span class="coverage-badge europe">Europa</span>
+                        <a href="https://www.gebco.net/" target="_blank" class="info-link" title="Info GEBCO"><i class="fas fa-info-circle"></i></a>
+                        <span class="coverage-badge global">Globale</span>
                     </div>
-                    <div class="layer-desc">Linee ravvicinate = pendenza ripida</div>
+                    <div class="layer-desc">GEBCO 2024 - isobate con etichette profondità in metri</div>
+                </label>
+            </div>
+            <div class="layer-item" data-coverage="global">
+                <input type="checkbox" id="layerDeepContours" checked>
+                <label for="layerDeepContours">
+                    <div class="layer-title">
+                        Isobate 1000m / 2000m
+                        <span class="coverage-badge global">GEBCO</span>
+                    </div>
+                    <div class="layer-desc">Linee profondità evidenziate: <span style="color:#ff4444;font-weight:bold;">1000m</span> e <span style="color:#aa00ff;font-weight:bold;">2000m</span></div>
                 </label>
             </div>
             </div><!-- /section-content -->
@@ -2455,8 +2465,8 @@
             </h3>
             <div class="section-content">
             <div class="slider-control">
-                <label>Opacità batimetria: <span id="opacityValue">40%</span></label>
-                <input type="range" id="opacitySlider" min="0" max="100" value="40">
+                <label>Opacità batimetria: <span id="opacityValue">85%</span></label>
+                <input type="range" id="opacitySlider" min="0" max="100" value="85">
             </div>
             <div class="slider-control">
                 <label>Luminosità mappa: <span id="brightnessValue">100%</span></label>
@@ -2668,19 +2678,24 @@
         }, 800);
 
 
-        // Initialize map - default to Ischia, Italia
+        // Initialize map - default to Quepos, Costa Rica
         const map = L.map('map', {
-            center: [40.7300, 13.9000],
-            zoom: 11,
+            center: [9.4300, -84.1600],
+            zoom: 10,
             zoomControl: false
         });
 
         // Add zoom control to bottom right
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-        // Base layer - OpenStreetMap
+        // Base layer - OpenStreetMap (non attivo di default)
         const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
+        });
+
+        // Base layer di default - Satellite (oceano scuro per evidenziare batimetria)
+        const satelliteDefault = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '© Esri'
         }).addTo(map);
 
         // Satellite layer (Esri)
@@ -2714,10 +2729,10 @@
         // WMS endpoint: https://wms.gebco.net/mapserv?
         // Available layers: gebco_latest (shaded relief), gebco_latest_2 (flat color-coded)
         const gebcoLayer = L.tileLayer.wms('https://wms.gebco.net/mapserv?', {
-            layers: 'gebco_latest',
+            layers: 'gebco_latest_2',
             format: 'image/png',
             transparent: true,
-            opacity: 0.5,
+            opacity: 0.6,
             attribution: '© <a href="https://www.gebco.net">GEBCO</a> 2024 Grid'
         });
 
@@ -2741,7 +2756,7 @@
         // maxNativeZoom: 9 means zoom 9 tiles will be scaled up for higher zoom levels
         const esriOceanLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}', {
             attribution: '© Esri, GEBCO, NOAA',
-            opacity: 0.5,
+            opacity: 0.85,
             maxNativeZoom: 9,
             maxZoom: 18,
             className: 'esri-ocean-tiles'
@@ -2754,14 +2769,41 @@
             opacity: 1
         });
 
-        // Depth contours (isobaths)
-        const contoursLayer = L.tileLayer.wms('https://ows.emodnet-bathymetry.eu/wms', {
-            layers: 'emodnet:contours',
-            format: 'image/png',
-            transparent: true,
-            opacity: 0.8
+        // Depth contours (isobaths) - GEBCO_2024 contours (global coverage)
+        // Source: GEBCO Bathymetric Contours via NOAA NCEI ArcGIS
+        // Intervals: 5m, 10m, 25m, 50m, 100m, 200m, 500m, 1000m, 2000m
+        const contoursLayer = L.tileLayer(
+            'https://tiles.arcgis.com/tiles/C8EMgrsFcRFL6LrL/arcgis/rest/services/GEBCO_contours/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '&copy; GEBCO 2024, NOAA NCEI',
+            opacity: 0.9,
+            maxZoom: 10,
+            maxNativeZoom: 10
         });
 
+
+        // Deep isobaths (1000m & 2000m) from OpenDEM/GEBCO 2021
+        let deepContoursLayer = L.layerGroup();
+        fetch('./isobaths_1000_2000.geojson')
+            .then(r => r.json())
+            .then(data => {
+                const geoLayer = L.geoJSON(data, {
+                    style: function(feature) {
+                        const d = feature.properties.depth;
+                        return {
+                            color: d === -1000 ? '#ff4444' : '#aa00ff',
+                            weight: 3,
+                            opacity: 0.85,
+                            dashArray: d === -2000 ? '8,4' : null
+                        };
+                    },
+                    onEachFeature: function(feature, layer) {
+                        const d = Math.abs(feature.properties.depth);
+                        layer.bindTooltip(d + 'm', {sticky: true, className: 'depth-tooltip'});
+                    }
+                });
+                geoLayer.addTo(deepContoursLayer);
+            })
+            .catch(e => console.warn('Isobaths load failed:', e));
 
         // ============================================
         // FISHING / OCEANOGRAPHIC LAYERS
@@ -3086,6 +3128,7 @@
         setupLayerToggle('layerETOPO', esriOceanLayer);
         setupLayerToggle('layerOceanRef', oceanRefLayer);
         setupLayerToggle('layerContours', contoursLayer);
+        setupLayerToggle('layerDeepContours', deepContoursLayer);
 
         // Fishing/oceanographic layers
         setupLayerToggle('layerSST', sstLayer);
@@ -3551,7 +3594,7 @@
             const lng = parseFloat(document.getElementById('lngInput').value);
 
             if (isNaN(lat) || isNaN(lng)) {
-                alert('Inserisci coordinate valide (es. Lat: 40.7300, Lng: 13.9000)');
+                alert('Inserisci coordinate valide (es. Lat: 9.4300, Lng: -84.1600)');
                 return;
             }
 
@@ -3600,14 +3643,136 @@
         updateInfoPanel();
 
         // Set initial place name
-        document.getElementById('currentPlace').textContent = 'Ischia, Italia';
-        document.getElementById('latInput').value = '40.730000';
-        document.getElementById('lngInput').value = '13.900000';
+        document.getElementById('currentPlace').textContent = 'Quepos, Costa Rica';
+        document.getElementById('latInput').value = '9.430000';
+        document.getElementById('lngInput').value = '-84.160000';
 
-        // Add initial marker for Ischia
-        addMarker(40.7300, 13.9000, 'Ischia, Italia');
+        // Add initial marker for Quepos
+        addMarker(9.4300, -84.1600, 'Quepos, Costa Rica');
 
-        
+        // Attiva GEBCO bathymetry di default (copertura globale, include Costa Rica)
+        map.addLayer(gebcoLayer);
+        const gebcoCheckbox = document.getElementById('layerGEBCO');
+        if (gebcoCheckbox) gebcoCheckbox.checked = true;
+
+        // Attiva anche Esri Ocean Base per contesto oceanico
+        map.addLayer(esriOceanLayer);
+        const esriCheckbox = document.getElementById('layerETOPO');
+        if (esriCheckbox) esriCheckbox.checked = true;
+
+        // Attiva isobate GEBCO sopra i layer colore (deve essere l'ultimo per visibilita')
+        map.addLayer(contoursLayer);
+
+        // Attiva isobate profonde 1000m/2000m (sopra contours per visibilita')
+        map.addLayer(deepContoursLayer);
+
+        // ============================================
+        // PUNTI DI PESCA - Sailfish & Marlin vicino Quepos
+        // ============================================
+        const fishingSpots = L.layerGroup().addTo(map);
+
+        const fishIcon = (color, emoji) => L.divIcon({
+            html: `<div style="background:${color};color:#fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);cursor:pointer;">${emoji}</div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+            popupAnchor: [0, -18],
+            className: ''
+        });
+
+        const spots = [
+            // --- OFFSHORE: Sailfish & Marlin (20-45 miglia) ---
+            {
+                lat: 9.20, lng: -84.55,
+                name: 'Continental Shelf Drop-off',
+                fill: '#1565c0', icon: fishIcon('#1565c0', '🐟'),
+                desc: '<b>Continental Shelf Drop-off</b><br>~25 miglia da Marina Pez Vela<br>Profondita\': da 200ft a 1.000-2.000ft<br><b>Specie:</b> Sailfish, Blue Marlin, Striped Marlin<br><b>Stagione:</b> Gen-Apr (peak), tutto l\'anno<br><b>Tecnica:</b> Trolling con ballyhoo e teaser'
+            },
+            {
+                lat: 9.35, lng: -84.60,
+                name: '"The 26" - Spot Marlin',
+                fill: '#0d47a1', icon: fishIcon('#0d47a1', '🏆'),
+                desc: '<b>"The 26"</b><br>~26 miglia offshore NW di Quepos<br>Spot leggendario per marlin e wahoo<br><b>Specie:</b> Blue Marlin, Wahoo, Yellowfin Tuna<br><b>Tecnica:</b> Speed trolling per wahoo, slow trolling live bait per marlin'
+            },
+            {
+                lat: 9.10, lng: -84.70,
+                name: '"El Furuno" - Hotspot Billfish',
+                fill: '#0d47a1', icon: fishIcon('#0d47a1', '🏆'),
+                desc: '<b>"El Furuno"</b><br>~35 miglia offshore SW di Quepos<br>Struttura sottomarina che concentra pelagici<br><b>Specie:</b> Sailfish, Blue Marlin, Black Marlin<br><b>Stagione:</b> Dic-Apr (peak sailfish)<br><b>Tecnica:</b> Trolling con spread di teaser e ballyhoo'
+            },
+            {
+                lat: 9.00, lng: -84.90,
+                name: 'FAD Zone - Marlin Concentrati',
+                fill: '#6a1b9a', icon: fishIcon('#6a1b9a', '🎯'),
+                desc: '<b>FAD Zone (Fish Aggregating Devices)</b><br>~45-60 miglia offshore<br>Boe ancorate che concentrano pelagici<br><b>Specie:</b> Blue Marlin, Black Marlin, Yellowfin Tuna, Dorado<br><b>Stagione:</b> Mag-Ott (Blue Marlin peak), tutto l\'anno<br><b>Note:</b> Trip overnight, partenza ore 15:00'
+            },
+            {
+                lat: 8.80, lng: -85.20,
+                name: 'Seamount Domain - Big Game',
+                fill: '#4a148c', icon: fishIcon('#4a148c', '🗻'),
+                desc: '<b>Seamount Domain</b><br>~80-100 miglia offshore<br>Montagne sottomarine con rilievo >1 km dal fondo<br>Include Fisher Seamount e Quepos Plateau<br><b>Specie:</b> Blue Marlin trophy, Black Marlin, Yellowfin Tuna giganti<br><b>Note:</b> Trip multi-day, solo barche grandi'
+            },
+            // --- NEARSHORE: Sailfish vicini (15-20 miglia) ---
+            {
+                lat: 9.38, lng: -84.38,
+                name: 'Punta Quepos Ledge',
+                fill: '#e65100', icon: fishIcon('#e65100', '⚡'),
+                desc: '<b>Punta Quepos Ledge</b><br>~8-12 miglia offshore<br>Dove l\'acqua inizia a cadere in profondita\'<br><b>Specie:</b> Mahi-Mahi, Yellowfin Tuna, Sailfish (stagionale)<br><b>Tecnica:</b> Trolling e live bait'
+            },
+            {
+                lat: 9.30, lng: -84.45,
+                name: 'Sailfish Grounds (20 miglia)',
+                fill: '#1565c0', icon: fishIcon('#1565c0', '⛵'),
+                desc: '<b>Sailfish Grounds</b><br>~20 miglia da Marina Pez Vela<br>Zona classica per sailfish, il piu\' vicino<br><b>Specie:</b> Sailfish (80-100 lbs media), Dorado<br><b>Stagione:</b> Dic-Apr (peak), double-digit releases<br><b>Tecnica:</b> Slow trolling ballyhoo + plastic teasers'
+            },
+            // --- SUD: Isla del Cano ---
+            {
+                lat: 8.72, lng: -83.88,
+                name: 'Isla del Cano - Offshore Billfish',
+                fill: '#00695c', icon: fishIcon('#00695c', '🏝️'),
+                desc: '<b>Isla del Cano</b><br>~60 miglia SE di Quepos<br>Acque profonde ricche di pelagici<br><b>Specie:</b> Sailfish, Marlin, Yellowfin Tuna, Dorado<br><b>Note:</b> Riserva biologica, pesca solo nelle acque circostanti<br>Partenza da Uvita o Drake Bay piu\' vicina'
+            },
+            // --- INSHORE: Roosterfish & strutture costiere ---
+            {
+                lat: 9.39, lng: -84.17,
+                name: 'Canyon Reef',
+                fill: '#2e7d32', icon: fishIcon('#2e7d32', '🪸'),
+                desc: '<b>Canyon Reef</b><br>Reef vicino alla costa di Quepos<br><b>Specie:</b> Snapper, Grouper, Roosterfish<br><b>Tecnica:</b> Bottom fishing, live bait'
+            },
+            {
+                lat: 9.38, lng: -84.15,
+                name: 'Isole Vulcaniche (incl. Olocuita)',
+                fill: '#2e7d32', icon: fishIcon('#2e7d32', '🏝️'),
+                desc: '<b>Isole Vulcaniche offshore Manuel Antonio</b><br>Dozzina di isole vulcaniche a vista<br><b>Specie:</b> Jacks, Snapper, Roosterfish<br><b>Note:</b> Vicine alla marina, pressione pesca alta<br><b>Tecnica:</b> Casting con popper e swim bait'
+            },
+            {
+                lat: 9.35, lng: -84.14,
+                name: 'Reef Sommerso Naranjo/Parque Nacional',
+                fill: '#2e7d32', icon: fishIcon('#2e7d32', '🪸'),
+                desc: '<b>Reef Sommerso - Foce Rio Naranjo</b><br>Reef lungo davanti al Parque Nacional<br><b>Specie:</b> Roosterfish (specialita\'!), Snapper<br><b>Tecnica:</b> Slow trolling live bait (blue runners)<br><b>Note:</b> Spot piu\' produttivo per roosterfish vicino a Quepos'
+            },
+            {
+                lat: 9.48, lng: -84.20,
+                name: 'Foce Rio Parrita',
+                fill: '#558b2f', icon: fishIcon('#558b2f', '🌊'),
+                desc: '<b>Foce Rio Parrita</b><br>Foce del fiume a nord di Quepos<br><b>Specie:</b> Jacks, Snapper, Roosterfish giovanili<br><b>Tecnica:</b> Casting al cambio di marea<br><b>Note:</b> Azione esplosiva ai cambi di marea'
+            },
+            {
+                lat: 9.30, lng: -84.13,
+                name: 'Foce Rio Savegre',
+                fill: '#558b2f', icon: fishIcon('#558b2f', '🌊'),
+                desc: '<b>Foce Rio Savegre</b><br>A sud di Manuel Antonio<br><b>Specie:</b> Snook (Pacific), Roosterfish, Snapper<br><b>Tecnica:</b> Live bait, casting<br><b>Note:</b> Ottimo per snook di taglia'
+            }
+        ];
+
+        spots.forEach(spot => {
+            // Marker icona al centro
+            L.marker([spot.lat, spot.lng], { icon: spot.icon })
+                .bindPopup(spot.desc, { maxWidth: 300 })
+                .addTo(fishingSpots);
+        });
+
+        // Contours layer (GEBCO) is controlled via layerContours checkbox
+
         // ============================================
         // LAZY LOADING - Carica layer in background
         // ============================================
