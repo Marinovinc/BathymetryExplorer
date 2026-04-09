@@ -21,12 +21,27 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Fix tremolio Android: blocca overscroll/pull-to-refresh del browser */
+        html {
+            overflow: hidden;
+            overscroll-behavior: none;
+            -ms-content-zooming: none;
+            touch-action: none;
         }
 
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background: #0f172a;
             color: #e2e8f0;
+            overflow: hidden;
+            overscroll-behavior: none;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
         }
 
         #map {
@@ -38,48 +53,15 @@
             z-index: 1;
             transition: filter 0.3s;
             touch-action: none;
-            /* Fix tremolio MIUI/Redmi: forza layer GPU isolato */
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-            will-change: transform;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
         }
 
-        /* Fix tremolio mappa su Android Redmi/Xiaomi/MIUI */
-        .leaflet-container {
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-        }
-        .leaflet-map-pane {
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            -webkit-transform-style: flat;
-            transform-style: flat;
-        }
-        .leaflet-tile-pane,
-        .leaflet-tile-container {
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            -webkit-transform-style: flat;
-            transform-style: flat;
-        }
+        /* Anti-jitter minimo su tile Leaflet (tutti i device) */
         .leaflet-tile {
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
-            -webkit-transform-style: flat;
-            transform-style: flat;
-            /* Forza rendering intero-pixel su GPU deboli */
-            image-rendering: auto;
         }
         /* Disabilita transizioni Leaflet SOLO su Android (MIUI/Redmi jitter) */
         .android-device .leaflet-zoom-anim .leaflet-zoom-animated {
-            -webkit-transition: none !important;
-            transition: none !important;
-        }
-        .android-device .leaflet-fade-anim .leaflet-popup {
             -webkit-transition: none !important;
             transition: none !important;
         }
@@ -2773,6 +2755,19 @@
         const isAndroid = /Android/i.test(navigator.userAgent);
         if (isAndroid) {
             document.body.classList.add('android-device');
+            // Blocca pull-to-refresh e overscroll del browser Android
+            document.addEventListener('touchmove', function(e) {
+                // Permetti scroll solo dentro elementi scrollabili (sidebar, popup)
+                let el = e.target;
+                while (el && el !== document.body) {
+                    const style = window.getComputedStyle(el);
+                    if ((style.overflowY === 'auto' || style.overflowY === 'scroll') && el.scrollHeight > el.clientHeight) {
+                        return; // Permetti scroll in questo elemento
+                    }
+                    el = el.parentElement;
+                }
+                e.preventDefault();
+            }, { passive: false });
         }
 
         // Initialize map - default to Quepos, Costa Rica
