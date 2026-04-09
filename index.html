@@ -46,9 +46,10 @@
             transition: filter 0.3s;
         }
 
-        /* Fix tremolio Android: nasconde rosa dei venti (deviceorientation causa jitter) */
-        .android-device #compassRose {
-            display: none !important;
+        /* Fix tremolio Android: rimuovi filter/transition dalla rosa (leggera su GPU deboli) */
+        .android-device #compassRose svg {
+            filter: none;
+            transition: none;
         }
 
         /* Mirino centrale - linee sottilissime */
@@ -8650,10 +8651,8 @@ Questa azione non puo essere annullata.`)) {
             showToast('Nord', 'Mappa orientata con il Nord in alto', 'success', 1500);
         }
 
-        // Inizializza al caricamento (su Android NO - causa tremolio via deviceorientation)
-        if (!isAndroid) {
-            document.addEventListener('DOMContentLoaded', initCompassRose);
-        }
+        // Inizializza al caricamento
+        document.addEventListener('DOMContentLoaded', initCompassRose);
 
         // ============================================
         // BOAT TRACKING - Auto-center quando esce dalla mappa
