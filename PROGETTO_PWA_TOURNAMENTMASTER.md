@@ -4,7 +4,7 @@
 **Data:** 2026-04-09
 **Dominio:** tournamentmaster.it
 **Strategia:** App Flutter Compilata + Distribuzione Ibrida
-**PWA attuale:** v2.4.3 (~11.000 righe)
+**PWA attuale:** v2.5.1 (~11.000 righe)
 
 ---
 
@@ -429,7 +429,7 @@ tournamentmaster.it/
         </div>
 
         <div class="version-info">
-            <h3>Novita v1.0.0 (basata su PWA v2.4.3)</h3>
+            <h3>Novita v1.0.0 (basata su PWA v2.5.1)</h3>
             <ul>
                 <li>18+ layer batimetrici mondiali</li>
                 <li>Isobate profonde 1000m/2000m colorate</li>
@@ -486,7 +486,7 @@ tournamentmaster.it/
     "apkSize": "48 MB",
     "releaseDate": "2026-04-09",
     "releaseNotes": [
-        "Prima release pubblica (basata su PWA v2.4.3)",
+        "Prima release pubblica (basata su PWA v2.5.1)",
         "18+ layer batimetrici globali",
         "Isobate profonde 1000m/2000m colorate",
         "OWC 2026 Quepos: spot, rotte, cerchio 50NM",
@@ -783,5 +783,5 @@ AddType application/vnd.android.package-archive .apk
 
 ---
 
-*Documento aggiornato: 2026-04-09 — PWA v2.4.3*
+*Documento aggiornato: 2026-04-09 — PWA v2.5.1*
 *Strategia: App Flutter Compilata - Android APK da sito + iOS App Store*

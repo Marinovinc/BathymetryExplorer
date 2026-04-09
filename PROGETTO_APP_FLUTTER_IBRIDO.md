@@ -3,7 +3,7 @@
 **Versione:** 3.0
 **Data:** 2026-04-09
 **Strategia:** Flutter compilato + Distribuzione Ibrida
-**PWA attuale:** v2.4.3 (~11.000 righe)
+**PWA attuale:** v2.5.1 (~11.000 righe)
 
 ---
 
@@ -233,7 +233,7 @@ flutter:
 | Righello misure (click forwarding) | 2/sessione | ✅ |
 | Export GPX/CSV | ❌ | ✅ |
 | Condivisione WhatsApp | ❌ | ✅ |
-| Mappe offline (SW v2.4.3) | ❌ | ✅ |
+| Mappe offline (SW v2.5.1) | ❌ | ✅ |
 | Pubblicità | Sì | No |
 
 ### 3.2 Prezzi
@@ -380,7 +380,7 @@ tournamentmaster.it/fishing/
   "apkSize": "48 MB",
   "releaseDate": "2026-04-09",
   "releaseNotes": [
-    "Prima release pubblica (basata su PWA v2.4.3)",
+    "Prima release pubblica (basata su PWA v2.5.1)",
     "18+ layer batimetrici globali",
     "Isobate profonde 1000m/2000m colorate",
     "OWC 2026 Quepos: spot, rotte, cerchio 50NM",
@@ -984,5 +984,5 @@ Pubblicità (utenti free):
 
 ---
 
-*Documento aggiornato: 2026-04-09 — PWA v2.4.3*
+*Documento aggiornato: 2026-04-09 — PWA v2.5.1*
 *Strategia: Flutter + Distribuzione Ibrida (APK sito + iOS App Store)*

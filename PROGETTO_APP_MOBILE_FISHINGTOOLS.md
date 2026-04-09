@@ -3,7 +3,7 @@
 **Versione:** 2.0
 **Data:** 2026-04-09
 **Stato:** Documento di Progetto
-**PWA attuale:** v2.4.3 (~11.000 righe)
+**PWA attuale:** v2.5.1 (~11.000 righe)
 
 ---
 
@@ -122,14 +122,14 @@ Trasformazione della PWA "FISHINGTOOLS Bathymetry Explorer" in applicazione mobi
 │  ├── capacitor-purchases (RevenueCat)       │
 │  └── @capacitor/splash-screen               │
 ├─────────────────────────────────────────────┤
-│  Web App (esistente — v2.4.3)               │
+│  Web App (esistente — v2.5.1)               │
 │  ├── index.html (~11.000 righe)             │
 │  ├── guide.html (guida utente 18 sezioni)   │
 │  ├── zones_data.js (zone torneo)            │
 │  ├── isobaths_1000_2000.geojson             │
 │  ├── Leaflet.js 1.9.4                       │
 │  ├── Font Awesome 6.5.1                     │
-│  └── Service Worker v2.4.3 (offline)        │
+│  └── Service Worker v2.5.1 (offline)        │
 └─────────────────────────────────────────────┘
 ```
 
@@ -516,7 +516,21 @@ URL suggerito: `https://marinovinc.github.io/BathymetryExplorer/privacy-policy.h
 
 ---
 
-## 12. NEXT STEPS
+## 12. NOTE COMPATIBILITA' ANDROID (v2.5.1)
+
+**Fix tremolio schermo su Android (Redmi/Xiaomi/Huawei):**
+
+La PWA v2.5.1 include un fix critico per dispositivi Android con GPU deboli. L'API `deviceorientation` (giroscopio bussola) causava repaint continui a 60+ Hz dell'intero schermo. Fix applicato:
+
+- `deviceorientation` NON auto-attivato su Android (richiede doppio-tap)
+- `filter: none` e `transition: none` sulla SVG bussola su Android
+- Rilevamento via `const isAndroid = /Android/i.test(navigator.userAgent)` + classe `.android-device` su `<html>`
+
+**IMPORTANTE per Capacitor:** Il fix e' gia' nel codice web. Se si wrappa con Capacitor, il comportamento e' identico. Nessuna modifica aggiuntiva necessaria per la build nativa.
+
+---
+
+## 13. NEXT STEPS
 
 1. **Approvazione documento** - Conferma strategia e budget
 2. **Setup ambiente** - Installare Capacitor, Xcode, Android Studio
@@ -535,4 +549,4 @@ URL suggerito: `https://marinovinc.github.io/BathymetryExplorer/privacy-policy.h
 
 ---
 
-*Documento aggiornato: 2026-04-09 — PWA v2.4.3*
+*Documento aggiornato: 2026-04-09 — PWA v2.5.1*
