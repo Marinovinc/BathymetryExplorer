@@ -10659,15 +10659,15 @@ Questa azione non puo essere annullata.`)) {
             document.getElementById('offlineProgressContainer').style.display = 'none';
         }
 
-        // Helper: ottieni SW attivo
-        async function getActiveServiceWorker() {
+        // Helper: ottieni SW attivo (silent=true per chiamate automatiche, no toast)
+        async function getActiveServiceWorker(silent = false) {
             // Service Worker non funziona con file://
             if (window.location.protocol === 'file:') {
-                showToast('Errore', 'Il download offline non funziona con file://. Usa http://localhost o GitHub Pages.', 'error', 5000);
+                if (!silent) showToast('Errore', 'Il download offline non funziona con file://. Usa http://localhost o GitHub Pages.', 'error', 5000);
                 return null;
             }
             if (!('serviceWorker' in navigator)) {
-                showToast('Errore', 'Service Worker non supportato dal browser.', 'error', 3000);
+                if (!silent) showToast('Errore', 'Service Worker non supportato dal browser.', 'error', 3000);
                 return null;
             }
             try {
@@ -10718,9 +10718,9 @@ Questa azione non puo essere annullata.`)) {
                 'info', 5000);
         }
 
-        // Ottieni dimensione cache
+        // Ottieni dimensione cache (chiamata automatica, silent)
         async function getOfflineCacheSize() {
-            const sw = await getActiveServiceWorker();
+            const sw = await getActiveServiceWorker(true);
             if (!sw) return;
 
             const messageChannel = new MessageChannel();
