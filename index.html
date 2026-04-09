@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FISHINGTOOLS Bathymetry Explorer - Mappe Batimetriche Mondiali</title>
 
     <!-- PWA Meta Tags -->
@@ -37,6 +37,28 @@
             bottom: 0;
             z-index: 1;
             transition: filter 0.3s;
+            touch-action: none;
+        }
+
+        /* Fix tremolio mappa su Android Redmi/Xiaomi (GPU Mali/Adreno sub-pixel jitter) */
+        .leaflet-container {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+        .leaflet-tile-pane {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+        .leaflet-tile {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            -webkit-transform-style: flat;
+            transform-style: flat;
+        }
+        .leaflet-map-pane,
+        .leaflet-tile-container {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
 
         /* Mirino centrale - linee sottilissime */
@@ -2728,7 +2750,11 @@
         const map = L.map('map', {
             center: [9.4300, -84.1600],
             zoom: 10,
-            zoomControl: false
+            zoomControl: false,
+            // Fix tremolio su Android Redmi/Xiaomi
+            zoomSnap: 1,
+            zoomDelta: 1,
+            wheelDebounceTime: 100
         });
 
         // Add zoom control to bottom right
