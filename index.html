@@ -3354,9 +3354,9 @@
 
         // Re-setup coverage-limited layers with coverage check
         // (Override the simple toggles set earlier)
+        // Nota: contoursLayer (GEBCO isobate) è globale, NON va qui
         setupLayerToggleWithCoverage('layerBathy', bathyLayer);
         setupLayerToggleWithCoverage('layerBathyHR', bathyHRLayer);
-        setupLayerToggleWithCoverage('layerContours', contoursLayer);
         setupLayerToggleWithCoverage('layerMPA', mpaLayer);
         setupLayerToggleWithCoverage('layerBlueTopo', blueTopo);
 
@@ -3401,13 +3401,8 @@
                     switched = true;
                 }
 
-                // Check if Isobate is active
-                const contoursCheckbox = document.getElementById('layerContours');
-                if (contoursCheckbox && contoursCheckbox.checked) {
-                    contoursCheckbox.checked = false;
-                    map.removeLayer(contoursLayer);
-                    switched = true;
-                }
+                // Isobate GEBCO (contoursLayer) NON vengono disattivate:
+                // hanno copertura globale (ArcGIS GEBCO_contours tiles)
 
                 // Check if MPA is active
                 const mpaCheckbox = document.getElementById('layerMPA');
@@ -3420,7 +3415,7 @@
                 if (switched) {
                     showToast(
                         'Layer adattati alla zona',
-                        `Passato automaticamente a <strong>Esri Ocean Base</strong> (copertura globale).<br><br>Layer non disponibili fuori Europa:<br>• Isobate (usa GEBCO Global come alternativa)<br>• Aree Marine Protette → <a href="https://www.protectedplanet.net/en/thematic-areas/marine-protected-areas" target="_blank" style="color:#7dd3fc">Protected Planet</a>`,
+                        `Passato automaticamente a <strong>Esri Ocean Base</strong> (copertura globale).<br><br>Layer disattivati (solo Europa):<br>• EMODnet Batimetria<br>• Aree Marine Protette → <a href="https://www.protectedplanet.net/en/thematic-areas/marine-protected-areas" target="_blank" style="color:#7dd3fc">Protected Planet</a>`,
                         'info',
                         8000
                     );
