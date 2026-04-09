@@ -47,25 +47,10 @@
         }
 
         /*
-         * Fix tremolio INTERO SCHERMO su Android Redmi/Xiaomi con display 90/120Hz.
-         * Causa: troppi layer position:fixed + transition CSS attivi = il browser
-         * MIUI ricompone tutti i layer ad ogni frame causando jitter continuo.
-         * Soluzione: su Android disabilita TUTTE le transition CSS e forza
-         * un singolo layer di compositing sull'intero body.
+         * Fix tremolio su Android Redmi/Xiaomi: la rosa dei venti con
+         * deviceorientation + filter:drop-shadow + transition su SVG
+         * causa repaint continui che fanno tremare l'intero schermo.
          */
-        .android-device,
-        .android-device *,
-        .android-device *::before,
-        .android-device *::after {
-            -webkit-transition: none !important;
-            transition: none !important;
-            -webkit-animation: none !important;
-            animation: none !important;
-        }
-        .android-device body {
-            -webkit-transform: translate3d(0,0,0);
-            transform: translate3d(0,0,0);
-        }
 
         /* Mirino centrale - linee sottilissime */
         #mapCrosshair {
@@ -141,6 +126,15 @@
         }
         #compassRose.compass-active svg {
             filter: drop-shadow(0 2px 8px rgba(125,211,252,0.6));
+        }
+        /* Android: rimuovi filter e transition sulla rosa (causa tremolio continuo) */
+        .android-device #compassRose svg {
+            filter: none;
+            -webkit-transition: none;
+            transition: none;
+        }
+        .android-device #compassRose.compass-active svg {
+            filter: none;
         }
 
         /* Header */
@@ -2756,40 +2750,14 @@
         const isAndroid = /Android/i.test(navigator.userAgent);
         if (isAndroid) {
             document.documentElement.classList.add('android-device');
-            // Blocca pull-to-refresh e overscroll del browser Android
-            document.addEventListener('touchmove', function(e) {
-                // Permetti scroll solo dentro elementi scrollabili (sidebar, popup)
-                let el = e.target;
-                while (el && el !== document.body) {
-                    const style = window.getComputedStyle(el);
-                    if ((style.overflowY === 'auto' || style.overflowY === 'scroll') && el.scrollHeight > el.clientHeight) {
-                        return; // Permetti scroll in questo elemento
-                    }
-                    el = el.parentElement;
-                }
-                e.preventDefault();
-            }, { passive: false });
         }
 
         // Initialize map - default to Quepos, Costa Rica
-        const mapOptions = {
+        const map = L.map('map', {
             center: [9.4300, -84.1600],
             zoom: 10,
-            zoomControl: false,
-            zoomSnap: 1,
-            zoomDelta: 1,
-            wheelDebounceTime: 100
-        };
-        // Fix aggressivi solo su Android (su iPhone mantiene animazioni fluide)
-        if (isAndroid) {
-            mapOptions.fadeAnimation = false;
-            mapOptions.zoomAnimation = false;
-            mapOptions.markerZoomAnimation = false;
-            mapOptions.tap = false;
-            mapOptions.bounceAtZoomLimits = false;
-            mapOptions.inertiaDeceleration = 2000;
-        }
-        const map = L.map('map', mapOptions);
+            zoomControl: false
+        });
 
         // Add zoom control to bottom right
         L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -8566,13 +8534,25 @@ Questa azione non puo essere annullata.`)) {
             compass.addEventListener('touchend', () => lastDragTime = Date.now());
 
             // Prova ad attivare device orientation (bussola reale)
+            // Su Android NON attivare automaticamente: il giroscopio manda eventi
+            // 60+ volte/sec che causano repaint continui e tremolio su Redmi/Xiaomi.
+            // Su Android si attiva solo con doppio-tap (come iOS).
             if (window.DeviceOrientationEvent) {
-                // iOS 13+ richiede permesso esplicito
                 if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    // iOS 13+ richiede permesso esplicito
                     compass.addEventListener('dblclick', requestCompassPermission);
-                } else {
+                } else if (!isAndroid) {
+                    // Desktop/altri: attiva automaticamente
                     window.addEventListener('deviceorientationabsolute', handleDeviceOrientation, true);
                     window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+                } else {
+                    // Android: attiva solo con doppio-tap
+                    compass.addEventListener('dblclick', function() {
+                        window.addEventListener('deviceorientationabsolute', handleDeviceOrientation, true);
+                        window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+                        showToast('Bussola attivata', 'La rosa ora segue il magnetometro', 'success', 2000);
+                        compass.classList.add('compass-active');
+                    });
                 }
             }
         }
