@@ -38,27 +38,50 @@
             z-index: 1;
             transition: filter 0.3s;
             touch-action: none;
+            /* Fix tremolio MIUI/Redmi: forza layer GPU isolato */
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            will-change: transform;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
 
-        /* Fix tremolio mappa su Android Redmi/Xiaomi (GPU Mali/Adreno sub-pixel jitter) */
+        /* Fix tremolio mappa su Android Redmi/Xiaomi/MIUI */
         .leaflet-container {
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
         }
-        .leaflet-tile-pane {
+        .leaflet-map-pane {
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
+            -webkit-transform-style: flat;
+            transform-style: flat;
+        }
+        .leaflet-tile-pane,
+        .leaflet-tile-container {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            -webkit-transform-style: flat;
+            transform-style: flat;
         }
         .leaflet-tile {
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
             -webkit-transform-style: flat;
             transform-style: flat;
+            /* Forza rendering intero-pixel su GPU deboli */
+            image-rendering: auto;
         }
-        .leaflet-map-pane,
-        .leaflet-tile-container {
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
+        /* Disabilita transizioni Leaflet che causano jitter su MIUI */
+        .leaflet-zoom-anim .leaflet-zoom-animated {
+            -webkit-transition: none !important;
+            transition: none !important;
+        }
+        .leaflet-fade-anim .leaflet-popup {
+            -webkit-transition: none !important;
+            transition: none !important;
         }
 
         /* Mirino centrale - linee sottilissime */
@@ -2751,10 +2774,17 @@
             center: [9.4300, -84.1600],
             zoom: 10,
             zoomControl: false,
-            // Fix tremolio su Android Redmi/Xiaomi
+            // Fix tremolio su Android Redmi/Xiaomi/MIUI
             zoomSnap: 1,
             zoomDelta: 1,
-            wheelDebounceTime: 100
+            wheelDebounceTime: 100,
+            fadeAnimation: false,
+            zoomAnimation: false,
+            markerZoomAnimation: false,
+            tap: false,
+            bounceAtZoomLimits: false,
+            inertia: true,
+            inertiaDeceleration: 2000
         });
 
         // Add zoom control to bottom right
