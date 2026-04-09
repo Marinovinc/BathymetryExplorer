@@ -46,11 +46,10 @@
             transition: filter 0.3s;
         }
 
-        /*
-         * Fix tremolio su Android Redmi/Xiaomi: la rosa dei venti con
-         * deviceorientation + filter:drop-shadow + transition su SVG
-         * causa repaint continui che fanno tremare l'intero schermo.
-         */
+        /* Fix tremolio Android: nasconde rosa dei venti (deviceorientation causa jitter) */
+        .android-device #compassRose {
+            display: none !important;
+        }
 
         /* Mirino centrale - linee sottilissime */
         #mapCrosshair {
@@ -8651,8 +8650,10 @@ Questa azione non puo essere annullata.`)) {
             showToast('Nord', 'Mappa orientata con il Nord in alto', 'success', 1500);
         }
 
-        // Inizializza al caricamento
-        document.addEventListener('DOMContentLoaded', initCompassRose);
+        // Inizializza al caricamento (su Android NO - causa tremolio via deviceorientation)
+        if (!isAndroid) {
+            document.addEventListener('DOMContentLoaded', initCompassRose);
+        }
 
         // ============================================
         // BOAT TRACKING - Auto-center quando esce dalla mappa
