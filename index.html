@@ -74,12 +74,12 @@
             /* Forza rendering intero-pixel su GPU deboli */
             image-rendering: auto;
         }
-        /* Disabilita transizioni Leaflet che causano jitter su MIUI */
-        .leaflet-zoom-anim .leaflet-zoom-animated {
+        /* Disabilita transizioni Leaflet SOLO su Android (MIUI/Redmi jitter) */
+        .android-device .leaflet-zoom-anim .leaflet-zoom-animated {
             -webkit-transition: none !important;
             transition: none !important;
         }
-        .leaflet-fade-anim .leaflet-popup {
+        .android-device .leaflet-fade-anim .leaflet-popup {
             -webkit-transition: none !important;
             transition: none !important;
         }
@@ -2769,23 +2769,31 @@
         }, 800);
 
 
+        // Detect Android per fix tremolio MIUI/Redmi
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        if (isAndroid) {
+            document.body.classList.add('android-device');
+        }
+
         // Initialize map - default to Quepos, Costa Rica
-        const map = L.map('map', {
+        const mapOptions = {
             center: [9.4300, -84.1600],
             zoom: 10,
             zoomControl: false,
-            // Fix tremolio su Android Redmi/Xiaomi/MIUI
             zoomSnap: 1,
             zoomDelta: 1,
-            wheelDebounceTime: 100,
-            fadeAnimation: false,
-            zoomAnimation: false,
-            markerZoomAnimation: false,
-            tap: false,
-            bounceAtZoomLimits: false,
-            inertia: true,
-            inertiaDeceleration: 2000
-        });
+            wheelDebounceTime: 100
+        };
+        // Fix aggressivi solo su Android (su iPhone mantiene animazioni fluide)
+        if (isAndroid) {
+            mapOptions.fadeAnimation = false;
+            mapOptions.zoomAnimation = false;
+            mapOptions.markerZoomAnimation = false;
+            mapOptions.tap = false;
+            mapOptions.bounceAtZoomLimits = false;
+            mapOptions.inertiaDeceleration = 2000;
+        }
+        const map = L.map('map', mapOptions);
 
         // Add zoom control to bottom right
         L.control.zoom({ position: 'bottomright' }).addTo(map);
